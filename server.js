@@ -3591,8 +3591,6 @@ app.get(
 
             const userQuery = {
 
-                isActive: true,
-
                 isBlocked: {
                     $ne: true
                 },
@@ -4722,8 +4720,6 @@ export const runCampaignWorker = (
                 // ==========================================
 
                 let matchQuery = {
-
-                    isActive: true,
 
                     isBlocked: {
                         $ne: true
