@@ -1,0 +1,4162 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت هوشمند روبیکا</title>
+    <!-- فونت وزیرمتن -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            flex-direction: row;
+        }
+
+        /* سایدبار کنترل پنل */
+        aside {
+            width: 280px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.02);
+            flex-shrink: 0;
+        }
+
+        aside h1 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-links li button {
+            width: 100%;
+            text-align: right;
+            background: transparent;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li button:hover,
+        .nav-links li button.active {
+            background: #eef2ff;
+            color: var(--primary);
+        }
+
+        /* محتوای اصلی */
+        main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 20px 25px;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+        }
+
+        header h2 {
+            font-size: 1.4rem;
+            color: var(--text-main);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* استایل کارت‌ها */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            margin-bottom: 24px;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* فرم‌ها و المان‌ها */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"],
+        select,
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff;
+            color: var(--text-main);
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .checkbox-group {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--bg-main);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-item input {
+            cursor: pointer;
+        }
+
+        /* دکمه‌ها */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        /* بخش وضعیت و مانیتورینگ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-main);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            background: var(--border);
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* جدول‌ها */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-main);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* هشدارها */
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        /* ===== مانیتورینگ جدید ===== */
+        .monitor-header-card {
+            background: linear-gradient(135deg, #111827, #1e1b4b);
+            color: #fff;
+            border-radius: 18px;
+            padding: 25px 28px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: 0 15px 35px rgba(79, 70, 229, .12)
+        }
+
+        .monitor-header-card h3 {
+            font-size: 1.35rem;
+            margin: 5px 0 8px
+        }
+
+        .monitor-header-card p {
+            color: #cbd5e1;
+            font-size: .86rem
+        }
+
+        .eyebrow,
+        .section-kicker {
+            font-size: .68rem;
+            letter-spacing: 1.4px;
+            font-weight: 700;
+            color: #818cf8
+        }
+
+        .live-indicator {
+            font-size: .78rem;
+            background: rgba(16, 185, 129, .12);
+            border: 1px solid rgba(16, 185, 129, .3);
+            padding: 9px 13px;
+            border-radius: 999px;
+            color: #a7f3d0;
+            white-space: nowrap
+        }
+
+        .live-indicator span {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-left: 7px;
+            box-shadow: 0 0 10px #10b981
+        }
+
+        .system-stats {
+            grid-template-columns: repeat(4, 1fr)
+        }
+
+        .system-stats .stat-card {
+            text-align: right;
+            padding: 18px
+        }
+
+        .stat-card small,
+        .stat-card span {
+            color: var(--text-muted);
+            font-size: .76rem
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 1.65rem;
+            color: var(--primary);
+            margin: 4px 0
+        }
+
+        .stat-card span {
+            display: block;
+            margin-top: 0;
+            font-size: .7rem
+        }
+
+        .monitor-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2.2fr) minmax(280px, .8fr);
+            gap: 18px
+        }
+
+        .monitor-main-card,
+        .monitoring-side-card {
+            margin-bottom: 0
+        }
+
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 18px
+        }
+
+        .section-title-row.compact {
+            margin-bottom: 14px
+        }
+
+        .section-title-row h3 {
+            border: 0;
+            padding: 0;
+            margin: 4px 0 0;
+            font-size: 1.08rem
+        }
+
+        .status-badge {
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 700
+        }
+
+        .status-badge.idle {
+            background: #f1f5f9;
+            color: #64748b
+        }
+
+        .status-badge.running {
+            background: #dcfce7;
+            color: #047857
+        }
+
+        .status-badge.paused {
+            background: #fef3c7;
+            color: #b45309
+        }
+
+        .status-badge.completed {
+            background: #dbeafe;
+            color: #1d4ed8
+        }
+
+        .status-badge.cancelled {
+            background: #fee2e2;
+            color: #b91c1c
+        }
+
+        .campaign-selector-row {
+            display: flex;
+            align-items: end;
+            gap: 15px
+        }
+
+        .campaign-select-wrap {
+            flex: 1;
+            max-width: none
+        }
+
+        .last-sync {
+            min-width: 150px;
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            padding: 10px 13px;
+            border-radius: 9px
+        }
+
+        .last-sync span {
+            display: block;
+            font-size: .68rem;
+            color: var(--text-muted)
+        }
+
+        .last-sync strong {
+            font-size: .82rem
+        }
+
+        .campaign-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 4px 0 18px
+        }
+
+        .campaign-actions .btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            filter: grayscale(.5)
+        }
+
+        .campaign-summary {
+            display: grid;
+            grid-template-columns: 1.5fr .8fr 1.2fr 1.2fr;
+            gap: 10px;
+            margin-bottom: 15px
+        }
+
+        .campaign-summary>div {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            min-width: 0
+        }
+
+        .campaign-summary span {
+            display: block;
+            font-size: .67rem;
+            color: var(--text-muted);
+            margin-bottom: 3px
+        }
+
+        .campaign-summary strong {
+            font-size: .8rem;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .live-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 9px
+        }
+
+        .live-stat {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 9px;
+            text-align: center
+        }
+
+        .live-stat span {
+            display: block;
+            font-size: .68rem;
+            color: var(--text-muted);
+            margin-bottom: 5px
+        }
+
+        .live-stat strong {
+            font-size: 1.15rem;
+            color: var(--text-main)
+        }
+
+        .live-stat.success {
+            border-color: #a7f3d0
+        }
+
+        .live-stat.success strong {
+            color: #059669
+        }
+
+        .live-stat.danger {
+            border-color: #fecaca
+        }
+
+        .live-stat.danger strong {
+            color: #dc2626
+        }
+
+        .live-stat.warning {
+            border-color: #fde68a
+        }
+
+        .live-stat.warning strong {
+            color: #d97706
+        }
+
+        .countdown-card {
+            margin-top: 14px;
+            padding: 18px 20px;
+            border: 1px solid #c7d2fe;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .countdown-label {
+            display: block;
+            color: #3730a3;
+            font-weight: 700;
+            font-size: .85rem
+        }
+
+        .countdown-card small {
+            color: #6366f1;
+            font-size: .68rem
+        }
+
+        .countdown-card>strong {
+            font-size: 2rem;
+            letter-spacing: 1px;
+            color: #4338ca;
+            min-width: 110px;
+            text-align: center;
+            font-variant-numeric: tabular-nums
+        }
+
+        .progress-block {
+            margin-top: 18px
+        }
+
+        .progress-heading,
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .78rem
+        }
+
+        .progress-heading strong {
+            color: var(--primary)
+        }
+
+        .progress-container.large {
+            height: 14px;
+            margin: 9px 0 7px
+        }
+
+        .progress-meta {
+            font-size: .68rem;
+            color: var(--text-muted)
+        }
+
+        .progress-meta b {
+            color: var(--text-main)
+        }
+
+        .live-logs-box {
+            height: 430px;
+            overflow: auto;
+            background: #0f172a;
+            color: #cbd5e1;
+            border-radius: 12px;
+            padding: 12px;
+            font-family: Consolas, monospace;
+            font-size: .72rem;
+            direction: ltr;
+            text-align: left
+        }
+
+        .log-line {
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, .1);
+            line-height: 1.6
+        }
+
+        .log-line span {
+            color: #38bdf8;
+            font-weight: 700;
+            margin-right: 6px
+        }
+
+        .log-line.success span {
+            color: #34d399
+        }
+
+        .log-line.error span {
+            color: #fb7185
+        }
+
+        .log-line.warn span {
+            color: #fbbf24
+        }
+
+        .clear-log-btn {
+            border: 0;
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 7px;
+            padding: 5px 9px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: .68rem
+        }
+
+        .server-status-card {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: .72rem
+        }
+
+        .server-status-card strong.online {
+            color: #059669
+        }
+
+        .server-status-card strong.offline {
+            color: #dc2626
+        }
+
+
+        @media (max-width: 600px) {
+            .monitor-header-card {
+                padding: 18px;
+                display: block
+            }
+
+            .live-indicator {
+                display: inline-block;
+                margin-top: 12px
+            }
+
+            .system-stats {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .campaign-selector-row {
+                display: block
+            }
+
+            .last-sync {
+                margin-bottom: 10px
+            }
+
+            .campaign-summary {
+                grid-template-columns: 1fr
+            }
+
+            .live-stats-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .countdown-card {
+                display: block;
+                text-align: center
+            }
+
+            .countdown-card>strong {
+                display: block;
+                margin-top: 10px
+            }
+
+            .campaign-actions .btn {
+                flex: 1 1 45%
+            }
+
+            .monitor-schedule-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* طراحی ریسپانسیو */
+        @media (max-width: 1100px) {
+            .monitor-layout {
+                grid-template-columns: 1fr
+            }
+
+            .live-logs-box {
+                height: 260px
+            }
+
+            .live-stats-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .campaign-summary {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+                border-left: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 5px;
+            }
+
+            .nav-links li {
+                flex: 1;
+            }
+
+            .nav-links li button {
+                text-align: center;
+                padding: 8px 10px;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+
+            main {
+                max-height: none;
+                padding: 15px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+
+        /* ===== استایل جدید فقط برای تب‌های غیرمانیتورینگ =====
+           بخش #tab-monitor و استایل‌های مانیتورینگ اصلی بدون تغییر باقی می‌مانند. */
+        #tab-upload .card,
+        #tab-users .card,
+        #tab-messages .card,
+        #tab-campaign .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+        #tab-upload .card:hover,
+        #tab-users .card:hover,
+        #tab-messages .card:hover,
+        #tab-campaign .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .09);
+            border-color: #c7d2fe;
+        }
+
+        #tab-upload .card h3,
+        #tab-users .card h3,
+        #tab-messages .card h3,
+        #tab-campaign .card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 13px;
+            margin-bottom: 20px;
+        }
+
+        #tab-upload .form-group,
+        #tab-users .form-group,
+        #tab-messages .form-group,
+        #tab-campaign .form-group {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 11px;
+            padding: 12px;
+        }
+
+        #tab-upload label,
+        #tab-users label,
+        #tab-messages label,
+        #tab-campaign label {
+            color: #475569;
+            font-weight: 600;
+        }
+
+        #tab-upload input[type="text"],
+        #tab-upload input[type="file"],
+        #tab-upload select,
+        #tab-upload textarea,
+        #tab-users input[type="text"],
+        #tab-users input[type="file"],
+        #tab-users select,
+        #tab-users textarea,
+        #tab-messages input[type="text"],
+        #tab-messages input[type="file"],
+        #tab-messages select,
+        #tab-messages textarea,
+        #tab-campaign input[type="text"],
+        #tab-campaign input[type="file"],
+        #tab-campaign select,
+        #tab-campaign textarea {
+            background: #fff;
+            border: 1px solid #dbe3ee;
+            border-radius: 10px;
+            min-height: 42px;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, .025);
+        }
+
+        #tab-upload input:focus,
+        #tab-users input:focus,
+        #tab-users select:focus,
+        #tab-messages input:focus,
+        #tab-messages select:focus,
+        #tab-messages textarea:focus,
+        #tab-campaign input:focus,
+        #tab-campaign select:focus,
+        #tab-campaign textarea:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .10);
+        }
+
+        #tab-upload .btn,
+        #tab-users .btn,
+        #tab-messages .btn,
+        #tab-campaign .btn {
+            border-radius: 10px;
+            box-shadow: 0 5px 12px rgba(15, 23, 42, .08);
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+
+        #tab-upload .btn:hover,
+        #tab-users .btn:hover,
+        #tab-messages .btn:hover,
+        #tab-campaign .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, .11);
+            filter: brightness(1.02);
+        }
+
+        #tab-upload table,
+        #tab-users table,
+        #tab-messages table,
+        #tab-campaign table {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        #tab-upload th,
+        #tab-users th,
+        #tab-messages th,
+        #tab-campaign th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        #tab-upload tr:hover td,
+        #tab-users tr:hover td,
+        #tab-messages tr:hover td,
+        #tab-campaign tr:hover td {
+            background: #f8fafc;
+        }
+
+        #tab-upload .alert,
+        #tab-users .alert,
+        #tab-messages .alert,
+        #tab-campaign .alert {
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+
+        #tab-upload .checkbox-group,
+        #tab-users .checkbox-group,
+        #tab-messages .checkbox-group,
+        #tab-campaign .checkbox-group {
+            border-radius: 11px;
+            background: #f8fafc;
+        }
+
+        @media (max-width: 900px) {
+
+            #tab-upload .card,
+            #tab-users .card,
+            #tab-messages .card,
+            #tab-campaign .card {
+                border-radius: 13px;
+            }
+        }
+
+
+        /* زمان‌بندی کمپین - فقط برای تب ساخت کمپین */
+        .campaign-schedule-box {
+            margin: 20px 0;
+            padding: 18px;
+            border: 1px solid rgba(127, 127, 127, 0.22);
+            border-radius: 16px;
+            background: rgba(127, 127, 127, 0.045);
+        }
+
+        .campaign-schedule-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .campaign-schedule-title strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .campaign-schedule-title small {
+            color: var(--text-muted);
+        }
+
+        .schedule-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .week-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .week-day {
+            cursor: pointer;
+        }
+
+        .week-day input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .week-day span {
+            display: block;
+            text-align: center;
+            padding: 10px 6px;
+            border: 1px solid rgba(127, 127, 127, .25);
+            border-radius: 10px;
+            transition: .15s ease;
+            user-select: none;
+        }
+
+        .week-day input:checked+span {
+            border-color: currentColor;
+            background: rgba(0, 128, 96, .10);
+            font-weight: 700;
+        }
+
+        .schedule-time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 12px;
+        }
+
+        .schedule-date-grid,
+        .schedule-delay-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 12px;
+        }
+
+        .schedule-field-note {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .schedule-delay-grid input[type="number"] {
+            direction: ltr;
+            text-align: center;
+        }
+
+        .schedule-delay-note {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 11px 13px;
+            margin-top: 4px;
+            border-radius: 10px;
+            background: rgba(127, 127, 127, .07);
+        }
+
+        .campaign-estimate {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .campaign-estimate>div {
+            padding: 11px;
+            border-radius: 10px;
+            background: rgba(127, 127, 127, .055);
+            text-align: center;
+        }
+
+        .campaign-estimate span {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .campaign-estimate strong {
+            font-size: 17px;
+        }
+
+        /* ===== اطلاعات زمان‌بندی در مانیتورینگ ===== */
+        .monitor-schedule-card {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .campaign-daily-stats-card {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .campaign-daily-stats-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .campaign-daily-stats-table {
+            margin-top: 0;
+            min-width: 520px;
+        }
+
+        .campaign-daily-stats-table th,
+        .campaign-daily-stats-table td {
+            padding: 10px 12px;
+        }
+
+        .campaign-daily-stats-table .daily-sent {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .campaign-daily-stats-table .daily-failed {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .campaign-daily-stats-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 18px;
+            font-size: .82rem;
+        }
+
+        .monitor-schedule-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .monitor-schedule-head h4 {
+            margin: 3px 0 0;
+            font-size: .98rem;
+        }
+
+        .schedule-live-state {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .schedule-live-state.active {
+            background: #dcfce7;
+            color: #047857;
+        }
+
+        .schedule-live-state.inactive {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .schedule-live-state.waiting {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .monitor-schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+        }
+
+        .monitor-schedule-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 11px;
+            min-width: 0;
+        }
+
+        .monitor-schedule-item span {
+            display: block;
+            color: var(--text-muted);
+            font-size: .66rem;
+            margin-bottom: 4px;
+        }
+
+        .monitor-schedule-item strong {
+            display: block;
+            font-size: .8rem;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .monitor-schedule-days {
+            margin-top: 9px;
+            padding: 10px 11px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px solid var(--border);
+        }
+
+        .monitor-schedule-days span {
+            color: var(--text-muted);
+            font-size: .66rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .schedule-day-chip {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 7px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+        .schedule-day-chip.today {
+            background: #dcfce7;
+            color: #047857;
+        }
+
+        .schedule-warning {
+            margin-top: 9px;
+            padding: 9px 11px;
+            border-radius: 9px;
+            font-size: .72rem;
+            line-height: 1.8;
+            display: none;
+        }
+
+        .schedule-warning.show {
+            display: block;
+        }
+
+        .schedule-warning.danger {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .schedule-warning.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .schedule-warning.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        @media (max-width: 760px) {
+            .week-days-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .schedule-time-grid,
+            .campaign-estimate {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* اعتبارسنجی ساخت کمپین */
+        #tab-campaign .required-mark {
+            color: var(--danger);
+            font-weight: 900;
+        }
+
+        #tab-campaign .optional-mark {
+            display: inline-block;
+            margin-right: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #6366f1;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        #tab-campaign .selection-count {
+            float: left;
+            color: #64748b;
+            font-size: .75rem;
+            font-weight: 700;
+        }
+
+        #tab-campaign .required-group.validation-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .08);
+        }
+
+        #tab-campaign .required-group.validation-ok {
+            border-color: #22c55e !important;
+        }
+
+        #tab-campaign .field-validation-hint {
+            display: block;
+            margin-top: 7px;
+            color: #dc2626;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        #tab-campaign .optional-hint {
+            color: #64748b;
+        }
+
+        #createCampaignBtn:disabled {
+            cursor: not-allowed;
+            opacity: .55;
+            filter: grayscale(.25);
+        }
+
+        /* =========================================================
+   MODERN UI REFRESH — visual only
+   No IDs, classes, markup, event handlers or application logic changed.
+   ========================================================= */
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #f43f5e;
+            --bg-main: #f5f7fb;
+            --card-bg: rgba(255, 255, 255, .92);
+            --text-main: #172033;
+            --text-muted: #718096;
+            --border: #e7eaf1;
+            --radius: 18px;
+            --shadow-sm: 0 4px 18px rgba(15, 23, 42, .045);
+            --shadow-md: 0 14px 40px rgba(15, 23, 42, .08);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 8% 0%, rgba(99, 102, 241, .08), transparent 28%),
+                radial-gradient(circle at 100% 15%, rgba(14, 165, 233, .07), transparent 25%),
+                var(--bg-main);
+            color: var(--text-main);
+            letter-spacing: -.01em;
+        }
+
+        aside {
+            width: 286px;
+            padding: 24px 18px;
+            background: rgba(255, 255, 255, .82);
+            border-left: 1px solid rgba(226, 232, 240, .8);
+            box-shadow: 8px 0 35px rgba(15, 23, 42, .035);
+            backdrop-filter: blur(18px);
+            position: relative;
+            z-index: 5;
+        }
+
+        aside h1 {
+            margin: 4px 10px 30px;
+            padding: 18px 12px;
+            border-radius: 18px;
+            color: #fff;
+            background: linear-gradient(135deg, #6366f1, #7c3aed);
+            box-shadow: 0 14px 28px rgba(99, 102, 241, .22);
+            font-size: 1.05rem;
+        }
+
+        .nav-links {
+            gap: 7px;
+        }
+
+        .nav-links li button {
+            padding: 13px 15px;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            color: #64748b;
+            font-weight: 600;
+            transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+        }
+
+        .nav-links li button:hover {
+            background: #f5f3ff;
+            color: #4f46e5;
+            transform: translateX(-2px);
+        }
+
+        .nav-links li button.active {
+            color: #4f46e5;
+            background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+            border-color: #e0e7ff;
+            box-shadow: 0 7px 18px rgba(99, 102, 241, .09);
+        }
+
+        main {
+            padding: 28px;
+        }
+
+        header {
+            margin-bottom: 22px;
+            padding: 18px 22px;
+            min-height: 76px;
+            background: rgba(255, 255, 255, .88);
+            border: 1px solid rgba(226, 232, 240, .85);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(14px);
+        }
+
+        header h2 {
+            font-size: 1.28rem;
+            font-weight: 800;
+        }
+
+        .card {
+            padding: 22px;
+            margin-bottom: 18px;
+            background: var(--card-bg);
+            border: 1px solid rgba(226, 232, 240, .85);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(12px);
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card h3 {
+            margin-bottom: 18px;
+            padding-bottom: 13px;
+            border-bottom: 1px solid #edf0f5;
+            font-weight: 800;
+        }
+
+        .grid-2 {
+            gap: 18px;
+        }
+
+        label {
+            color: #5f6b7a;
+            font-weight: 650;
+        }
+
+        input[type="text"],
+        select,
+        textarea,
+        input[type="file"] {
+            padding: 12px 14px;
+            border: 1px solid #e1e6ef;
+            border-radius: 13px;
+            background: #fff;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, .025);
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, .10);
+        }
+
+        textarea {
+            min-height: 110px;
+        }
+
+        .checkbox-group {
+            padding: 12px;
+            border: 1px solid #e3e8f0;
+            border-radius: 14px;
+            background: #f8fafc;
+        }
+
+        .checkbox-item {
+            padding: 9px 10px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            transition: background .18s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #eef2ff;
+        }
+
+        .btn {
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-weight: 700;
+            box-shadow: 0 7px 16px rgba(15, 23, 42, .07);
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, .11);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-sm {
+            padding: 7px 12px;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            gap: 14px;
+        }
+
+        .stat-card {
+            padding: 17px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #fff, #f8fafc);
+            border: 1px solid #e8ecf3;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card strong {
+            font-weight: 850;
+        }
+
+        .progress-container {
+            height: 10px;
+            margin-top: 14px;
+            background: #e9edf4;
+            border-radius: 999px;
+        }
+
+        .progress-bar {
+            border-radius: 999px;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border: 1px solid #e8ecf3;
+            border-radius: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 13px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 750;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        tbody tr:hover td {
+            background: #fafbff;
+        }
+
+        .alert {
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 11px 14px;
+        }
+
+        .alert-success {
+            border-color: #a7f3d0;
+        }
+
+        .alert-danger {
+            border-color: #fecdd3;
+        }
+
+        /* Keep the existing Monitoring component's visual language intact.
+   Only global surfaces around it receive the refreshed shell above. */
+
+        @media (max-width: 1050px) {
+            aside {
+                width: 230px;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                min-height: auto;
+                padding: 12px;
+                position: sticky;
+                top: 0;
+                border-left: 0;
+                border-bottom: 1px solid #e7eaf1;
+            }
+
+            aside h1 {
+                margin: 0 0 10px;
+                padding: 12px;
+            }
+
+            .nav-links {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links li button {
+                text-align: center;
+                padding: 10px 8px;
+                font-size: .82rem;
+            }
+
+            main {
+                padding: 14px;
+                max-height: none;
+            }
+
+            header {
+                border-radius: 16px;
+                padding: 15px;
+            }
+
+            .card {
+                border-radius: 16px;
+                padding: 16px;
+            }
+
+            .stats-grid,
+            .system-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .monitor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats-grid,
+            .system-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 9px;
+            }
+
+            .btn-group {
+                gap: 7px;
+            }
+
+            .btn {
+                width: auto;
+            }
+        }
+
+
+        .jalali-date-control {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .jalali-date-input {
+            flex: 1;
+            cursor: pointer;
+            text-align: right !important;
+            direction: rtl
+        }
+
+        .jalali-calendar-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-color, #dfe3ea);
+            border-radius: 12px;
+            background: var(--card-bg, #fff);
+            cursor: pointer;
+            font-size: 18px;
+            transition: .2s
+        }
+
+        .jalali-calendar-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(0, 0, 0, .08)
+        }
+
+        .jalali-picker {
+            position: fixed;
+            z-index: 99999;
+            width: 330px;
+            max-width: calc(100vw - 24px);
+            background: var(--card-bg, #fff);
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, .18);
+            padding: 14px;
+            direction: rtl
+        }
+
+        .jalali-picker-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px
+        }
+
+        .jalali-picker-title {
+            font-weight: 800;
+            font-size: 15px
+        }
+
+        .jalali-picker-nav {
+            border: 0;
+            background: transparent;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 18px
+        }
+
+        .jalali-picker-nav:hover {
+            background: rgba(0, 0, 0, .06)
+        }
+
+        .jalali-picker-week,
+        .jalali-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px
+        }
+
+        .jalali-picker-week span {
+            text-align: center;
+            font-size: 11px;
+            opacity: .6;
+            padding: 5px 0
+        }
+
+        .jalali-picker-day {
+            height: 36px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        .jalali-picker-day:hover {
+            background: rgba(0, 0, 0, .07)
+        }
+
+        .jalali-picker-day.muted {
+            opacity: .28
+        }
+
+        .jalali-picker-day.today {
+            box-shadow: inset 0 0 0 1px currentColor
+        }
+
+        .jalali-picker-day.selected {
+            background: currentColor;
+            color: #fff
+        }
+
+        .jalali-picker-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 0, 0, .07)
+        }
+
+        .jalali-picker-clear {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            opacity: .7
+        }
+
+        .jalali-picker-today {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- سایدبار مدیریت -->
+    <aside>
+        <h1>پنل مدیریت روبیکا</h1>
+        <ul class="nav-links">
+            <li><button type="button" class="active" onclick="switchTab('tab-upload', this)">📁 آپلود مخاطبان</button>
+            </li>
+            <li><button type="button" onclick="switchTab('tab-users', this)">👥 مدیریت مخاطبان</button></li>
+            <li><button type="button" onclick="switchTab('tab-messages', this)">✍️ ثبت و مدیریت پیام‌ها</button></li>
+            <li><button type="button" onclick="switchTab('tab-campaign', this)">🎯 ساخت کمپین</button></li>
+            <li><button type="button" onclick="switchTab('tab-monitor', this)">📊 داشبورد و مانیتورینگ</button></li>
+        </ul>
+    </aside>
+
+    <!-- محتوای اصلی صفحات -->
+    <main>
+        <header>
+            <h2 id="pageTitle">آپلود فایل مخاطبان</h2>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">سیستم اتوماسیون هوشمند روبیکا</span>
+        </header>
+
+        <!-- تب ۱: آپلود اکسل -->
+        <div id="tab-upload" class="tab-content active">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h3>آپلود لیست مخاطبان از طریق فایل اکسل</h3>
+                <div class="form-group">
+                    <label>فایل اکسل (.xlsx یا .xls) حاوی ستون‌های تلفن همراه، نام کسب‌وکار، نوع مخاطب، تگ و
+                        بلاک:</label>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls">
+                </div>
+                <button type="button" class="btn" onclick="uploadExcel()">آپلود و ذخیره در دیتابیس</button>
+                <div id="uploadAlert" class="alert"></div>
+            </div>
+        </div>
+
+        <!-- تب ۲: مدیریت مخاطبان -->
+        <div id="tab-users" class="tab-content">
+            <div class="card">
+                <h3>➕ افزودن مخاطب جدید به صورت دستی</h3>
+                <input type="hidden" id="editUserId">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>نام کسب‌وکار:</label>
+                        <input type="text" id="userBusiness" placeholder="مثلاً: شرکت فناوری">
+                    </div>
+                    <div class="form-group">
+                        <label>شماره موبایل:</label>
+                        <input type="text" id="userMobile" placeholder="09123456789">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>نوع مخاطب (دسته):</label>
+                        <input type="text" id="userCategory" placeholder="مثلاً: مشتری، معمار">
+                    </div>
+                    <div class="form-group">
+                        <label>تگ‌ها (با کاما جدا کنید):</label>
+                        <input type="text" id="userTags" placeholder="vip, تهران, جدید">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="userBlocked"> مسدود کردن کاربر (دریافت نکردن پیام)
+                    </label>
+                </div>
+                <button type="button" class="btn btn-success" id="saveUserBtn" onclick="saveUser()">افزودن
+                    مخاطب</button>
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;"
+                    onclick="resetUserForm()">لغو ویرایش</button>
+                <div id="userFormAlert" class="alert"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔍 جستجو و مدیریت مخاطبان</h3>
+                <div class="form-group">
+                    <label>جستجو بر اساس شماره موبایل یا نام کسب‌وکار:</label>
+                    <input type="text" id="searchInput" placeholder="مثلاً 0912 یا نام شرکت..." oninput="searchUsers()">
+                </div>
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>نام کسب‌وکار</th>
+                                <th>شماره موبایل</th>
+                                <th>دسته</th>
+                                <th>تگ‌ها</th>
+                                <th>وضعیت بلاک</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageUsersTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-muted);">لطفاً برای جستجوی
+                                    مخاطب چیزی تایپ کنید...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- تب ۳: ثبت و مدیریت پیام‌ها -->
+        <div id="tab-messages" class="tab-content">
+            <div class="card">
+                <h3>📊 آمار بانک پیام‌ها به تفکیک موضوع</h3>
+                <div style="max-height: 250px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>موضوع پیام</th>
+                                <th>تعداد پیام‌ها</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messageStatsTableBody">
+                            <tr>
+                                <td colspan="2" style="text-align: center;">در حال بارگذاری آمار...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="max-width: 700px; margin: 20px auto;">
+                <h3 id="msgFormTitle">✍️ ثبت پیام جدید</h3>
+                <input type="hidden" id="editMsgId">
+                <div class="form-group">
+                    <label>متن پیام:</label>
+                    <textarea id="msgText" placeholder="متن پیام را وارد کنید..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>موضوع پیام (مثلاً: هوش مصنوعی، معماری، تخفیف):</label>
+                    <input type="text" id="msgSubject" placeholder="موضوع را بنویسید">
+                </div>
+                <button type="button" class="btn" id="saveMsgBtn" onclick="createMessage()">ثبت پیام در دیتابیس</button>
+                <button type="button" class="btn btn-secondary" id="cancelMsgEditBtn" style="display:none;"
+                    onclick="resetMessageForm()">لغو ویرایش</button>
+                <div id="msgAlert" class="alert"></div>
+            </div>
+
+            <div class="card" style="max-width: 700px; margin: 20px auto;">
+                <h3>📥 وارد کردن پیام‌ها از اکسل</h3>
+                <p>فایل اکسل باید شامل ستون‌های «موضوع» و «متن پیام» باشد.</p>
+                <div class="form-group">
+                    <label>فایل اکسل:</label>
+                    <input type="file" id="messagesExcelFile" accept=".xlsx,.xls,.csv">
+                </div>
+                <button type="button" class="btn" onclick="uploadMessagesExcel()">وارد کردن پیام‌ها</button>
+                <div id="messagesExcelAlert" class="alert"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔍 جستجو و مدیریت بانک پیام‌ها</h3>
+                <div class="form-group">
+                    <label>جستجو بر اساس موضوع یا متن پیام:</label>
+                    <input type="text" id="searchMsgInput" placeholder="موضوع یا کلمه‌ای از متن..."
+                        oninput="searchMessages()">
+                </div>
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>موضوع</th>
+                                <th>متن پیام</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageMessagesTableBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: var(--text-muted);">لطفاً برای جستجوی
+                                    پیام چیزی تایپ کنید...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- تب ۴: ساخت کمپین -->
+        <div id="tab-campaign" class="tab-content">
+            <div class="card" style="max-width: 700px; margin: 0 auto;">
+                <h3>تنظیمات و ساخت کمپین جدید</h3>
+                <div class="form-group">
+                    <label>عنوان کمپین:</label>
+                    <input type="text" id="campTitle" placeholder="مثلاً: کمپین شهریور ماه">
+                </div>
+                <div class="form-group">
+                    <label>نوع کمپین:</label>
+                    <select id="campType" onchange="loadMetaOptions()">
+                        <option value="normal">عادی (Normal)</option>
+                        <option value="festival">جشنواره (Festival)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top:14px;">
+                    <label for="campContentMode">نوع محتوای کمپین:</label>
+                    <select id="campContentMode" onchange="onCampaignContentModeChange()">
+                        <option value="text">فقط متن</option>
+                        <option value="image">فقط تصویر</option>
+                        <option value="text-image">متن + تصویر</option>
+                    </select>
+                    <small class="schedule-field-note">در حالت ترکیبی، برای هر مخاطب یک متن و یک تصویر به‌صورت تصادفی
+                        انتخاب می‌شود.</small>
+                </div>
+                <div id="campaignImageLibraryBox" class="form-group"
+                    style="display:none; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:18px;">
+                    <label>کتابخانه تصاویر کمپین</label>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0;">
+                        <input type="file" id="campaignImageUpload" accept="image/png,image/jpeg,image/webp" multiple>
+                        <button type="button" class="btn" onclick="uploadCampaignImages()">بارگذاری تصاویر</button>
+                        <button type="button" class="btn btn-secondary" onclick="loadCampaignImageLibrary()">به‌روزرسانی
+                            گالری</button>
+                    </div>
+                    <small id="campaignImagesHint" class="schedule-field-note">تصاویر موردنظر را انتخاب کنید؛ برای هر
+                        مخاطب یکی از تصاویر انتخاب‌شده به‌صورت تصادفی استفاده می‌شود.</small>
+                    <div id="campaignImageGallery"
+                        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px;margin-top:12px;">
+                    </div>
+                    <div style="margin-top:10px;font-weight:700;">تصاویر انتخاب‌شده: <span
+                            id="campaignSelectedImagesCount">۰</span></div>
+                </div>
+
+                <div class="campaign-schedule-box">
+                    <div class="campaign-schedule-title">
+                        <div>
+                            <strong>زمان‌بندی ارسال</strong>
+                            <small>کمپین فقط در روزها و ساعت‌های انتخاب‌شده پیام ارسال می‌کند.</small>
+                        </div>
+                        <label class="schedule-toggle">
+                            <input type="checkbox" id="campScheduleEnabled" checked onchange="updateCampaignEstimate()">
+                            <span>فعال</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>روزهای هفته:</label>
+                        <div class="week-days-grid">
+                            <label class="week-day"><input type="checkbox" name="campDay" value="6" checked
+                                    onchange="updateCampaignEstimate()"><span>شنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="0" checked
+                                    onchange="updateCampaignEstimate()"><span>یکشنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="1" checked
+                                    onchange="updateCampaignEstimate()"><span>دوشنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="2" checked
+                                    onchange="updateCampaignEstimate()"><span>سه‌شنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="3" checked
+                                    onchange="updateCampaignEstimate()"><span>چهارشنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="4" checked
+                                    onchange="updateCampaignEstimate()"><span>پنجشنبه</span></label>
+                            <label class="week-day"><input type="checkbox" name="campDay" value="5" checked
+                                    onchange="updateCampaignEstimate()"><span>جمعه</span></label>
+                        </div>
+                    </div>
+
+                    <div class="schedule-date-grid">
+                        <div class="form-group">
+                            <label for="campStartDate">تاریخ شروع:</label>
+                            <div class="jalali-date-control"><input type="text" id="campStartDateDisplay"
+                                    class="jalali-date-input" readonly placeholder="مثلاً ۱۴۰۵/۰۷/۰۱"><input
+                                    type="hidden" id="campStartDate" onchange="updateCampaignEstimate()"><button
+                                    type="button" class="jalali-calendar-btn"
+                                    onclick="openJalaliPicker('campStartDate')"
+                                    aria-label="انتخاب تاریخ شروع">📅</button></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="campEndDate">تاریخ پایان:</label>
+                            <div class="jalali-date-control"><input type="text" id="campEndDateDisplay"
+                                    class="jalali-date-input" readonly placeholder="مثلاً ۱۴۰۵/۰۷/۳۰"><input
+                                    type="hidden" id="campEndDate" onchange="updateCampaignEstimate()"><button
+                                    type="button" class="jalali-calendar-btn" onclick="openJalaliPicker('campEndDate')"
+                                    aria-label="انتخاب تاریخ پایان">📅</button></div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-time-grid">
+                        <div class="form-group">
+                            <label for="campStartTime">شروع ارسال:</label>
+                            <input type="time" id="campStartTime" value="10:00" onchange="updateCampaignEstimate()">
+                        </div>
+                        <div class="form-group">
+                            <label for="campEndTime">پایان ارسال:</label>
+                            <input type="time" id="campEndTime" value="12:00" onchange="updateCampaignEstimate()">
+                        </div>
+                    </div>
+
+                    <div class="schedule-delay-grid">
+                        <div class="form-group">
+                            <label for="campMinDelay">حداقل فاصله ارسال (ثانیه):</label>
+                            <input type="number" id="campMinDelay" min="1" max="86400" step="1" value="180"
+                                onchange="updateCampaignEstimate()">
+                            <small class="schedule-field-note">مثلاً ۱۸۰ ثانیه</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="campMaxDelay">حداکثر فاصله ارسال (ثانیه):</label>
+                            <input type="number" id="campMaxDelay" min="1" max="86400" step="1" value="300"
+                                onchange="updateCampaignEstimate()">
+                            <small class="schedule-field-note">مثلاً ۳۰۰ ثانیه</small>
+                        </div>
+                    </div>
+
+                    <div class="schedule-delay-note">
+                        <span>⏱ فاصله هر ارسال</span>
+                        <strong id="campaignDelaySummary">رندوم بین ۱۸۰ تا ۳۰۰ ثانیه</strong>
+                    </div>
+
+                    <div id="campaignEstimate" class="campaign-estimate">
+                        <div><span>روزهای فعال در بازه</span><strong id="estimateDays">--</strong></div>
+                        <div><span>پیام تقریبی روزانه</span><strong id="estimateDaily">--</strong></div>
+                        <div><span>میانگین تقریبی کل</span><strong id="estimateAvg">--</strong></div>
+                        <div><span>کاربران هدف</span><strong id="estimateUsers">--</strong></div>
+                    </div>
+                    <small class="schedule-field-note">تعداد روزانه و میانگین کل بر اساس زمان ارسال و میانگین فاصله هر
+                        پیام محاسبه می‌شوند.</small>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group required-campaign-field">
+                        <label>انتخاب موضوعات پیام <span class="required-mark">*</span> <span
+                                id="subjectsSelectionCount" class="selection-count">۰ انتخاب</span></label>
+                        <div id="subjectsContainer" class="checkbox-group required-group"></div>
+                        <div class="campaign-estimate" style="grid-template-columns: repeat(3, 1fr);">
+                            <div><span>پیام‌های انتخاب‌شده</span><strong id="selectedMessagesCount">--</strong></div>
+                            <div><span>میانگین تقریبی</span><strong id="selectedMessagesAverage">--</strong></div>
+                            <div><span>نرخ</span><strong id="selectedMessagesRate">--</strong></div>
+                        </div>
+                        <small id="subjectsValidationHint" class="field-validation-hint">حداقل یک موضوع پیام را انتخاب
+                            کنید.</small>
+                    </div>
+                    <div class="form-group required-campaign-field">
+                        <label>مخاطبان هدف (دسته‌بندی‌ها) <span class="required-mark">*</span> <span
+                                id="categoriesSelectionCount" class="selection-count">۰ انتخاب</span></label>
+                        <div id="categoriesContainer" class="checkbox-group required-group"></div>
+                        <div class="schedule-delay-note">
+                            <span>👥 تعداد کاربران انتخاب‌شده</span>
+                            <strong id="selectedUsersCount">--</strong>
+                        </div>
+                        <small id="categoriesValidationHint" class="field-validation-hint">حداقل یک دسته مخاطب را انتخاب
+                            کنید.</small>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>تگ‌های هدف <span class="optional-mark">اختیاری</span> <span id="tagsSelectionCount"
+                            class="selection-count">۰ انتخاب</span></label>
+                    <div id="tagsContainer" class="checkbox-group"></div>
+                    <small class="field-validation-hint optional-hint">اگر تگی انتخاب کنید، فقط مخاطبانی که آن تگ را
+                        دارند هدف قرار می‌گیرند.</small>
+                </div>
+
+                <button id="createCampaignBtn" type="button" class="btn btn-success" onclick="createCampaign()"
+                    disabled>ایجاد کمپین</button>
+                <div id="campAlert" class="alert"></div>
+            </div>
+        </div>
+
+        <!-- تب ۵: مانیتورینگ و داشبورد جامع -->
+        <div id="tab-monitor" class="tab-content">
+            <div class="monitor-header-card">
+                <div>
+                    <div class="eyebrow">LIVE MONITORING</div>
+                    <h3>داشبورد لحظه‌ای کمپین‌ها</h3>
+                    <p>وضعیت ارسال، صف مخاطبان، تایمر ارسال بعدی و آمار سیستم به‌صورت خودکار به‌روزرسانی می‌شود.</p>
+                </div>
+                <div class="live-indicator"><span></span> اتصال زنده</div>
+            </div>
+
+            <div class="stats-grid system-stats">
+                <div class="stat-card"><small>کل کاربران</small><strong id="sysTotalUsers">0</strong><span>مخاطب
+                        ثبت‌شده</span></div>
+                <div class="stat-card"><small>کاربران فعال</small><strong id="sysActiveUsers">0</strong><span>قابل
+                        استفاده در کمپین</span></div>
+                <div class="stat-card"><small>کل پیام‌ها</small><strong id="sysTotalMessages">0</strong><span>پیام
+                        ثبت‌شده</span></div>
+                <div class="stat-card"><small>کل کمپین‌ها</small><strong id="sysTotalCampaigns">0</strong><span>کمپین
+                        موجود</span></div>
+            </div>
+
+            <div class="monitor-layout">
+                <div class="card monitor-main-card">
+                    <div class="section-title-row">
+                        <div>
+                            <div class="section-kicker">CAMPAIGN CONTROL</div>
+                            <h3>کنترل و مانیتورینگ کمپین</h3>
+                        </div>
+                        <div id="campaignLiveBadge" class="status-badge idle">بدون انتخاب</div>
+                    </div>
+
+                    <div class="campaign-selector-row">
+                        <div class="form-group campaign-select-wrap">
+                            <label>کمپین موردنظر</label>
+                            <select id="activeCampSelect" onchange="onCampaignSelected()">
+                                <option value="">-- انتخاب کمپین --</option>
+                            </select>
+                        </div>
+                        <div class="last-sync">
+                            <span>آخرین بروزرسانی</span>
+                            <strong id="lastSyncTime">--:--:--</strong>
+                        </div>
+                    </div>
+
+                    <div class="campaign-actions">
+                        <button type="button" class="btn btn-success" id="startCampaignBtn" onclick="startCampaign()">▶
+                            شروع کمپین</button>
+                        <button type="button" class="btn btn-warning" id="pauseResumeBtn"
+                            onclick="togglePauseResume()">⏸ توقف موقت</button>
+                        <button type="button" class="btn btn-danger" id="cancelCampaignBtn"
+                            onclick="stopCampaign('cancelled')">■ لغو کمپین</button>
+                        <button type="button" class="btn btn-danger" id="deleteCampaignBtn"
+                            onclick="deleteCampaign()">🗑 حذف کمپین</button>
+                        <button type="button" class="btn btn-secondary" onclick="refreshMonitoring(true)">↻
+                            بروزرسانی</button>
+                    </div>
+
+                    <div class="campaign-summary">
+                        <div><span>عنوان کمپین</span><strong id="monitorCampaignTitle">--</strong></div>
+                        <div><span>نوع</span><strong id="monitorCampaignType">--</strong></div>
+                        <div><span>موضوعات</span><strong id="monitorCampaignSubjects">--</strong></div>
+                        <div><span>دسته‌های هدف</span><strong id="monitorCampaignCategories">همه</strong></div>
+                    </div>
+
+                    <div class="monitor-schedule-card">
+                        <div class="monitor-schedule-head">
+                            <div>
+                                <div class="section-kicker">CAMPAIGN SCHEDULE</div>
+                                <h4>برنامه فعال کمپین</h4>
+                            </div>
+                            <div id="monitorScheduleState" class="schedule-live-state waiting">در حال بررسی</div>
+                        </div>
+
+                        <div class="monitor-schedule-grid">
+                            <div class="monitor-schedule-item">
+                                <span>بازه تاریخ</span>
+                                <strong id="monitorScheduleDateRange">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>بازه روزانه</span>
+                                <strong id="monitorScheduleTime">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>وضعیت امروز</span>
+                                <strong id="monitorScheduleToday">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>پنجره بعدی</span>
+                                <strong id="monitorNextWindow">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>تعداد روزهای فعال در بازه</span>
+                                <strong id="monitorScheduleActiveDays">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>فاصله ارسال</span>
+                                <strong id="monitorScheduleDelay">--</strong>
+                            </div>
+                            <div class="monitor-schedule-item">
+                                <span>تخمین کل پیام‌ها</span>
+                                <strong id="monitorScheduleEstimate">--</strong>
+                            </div>
+                        </div>
+
+                        <div class="monitor-schedule-days">
+                            <span>روزهای مجاز ارسال</span>
+                            <div id="monitorScheduleDays">--</div>
+                        </div>
+
+                        <div id="monitorScheduleWarning" class="schedule-warning"></div>
+                    </div>
+
+                    <div class="live-stats-grid">
+                        <div class="live-stat"><span>مخاطبان هدف</span><strong id="stTotalUsers">0</strong></div>
+                        <div class="live-stat success"><span>ارسال موفق</span><strong id="stSentUsers">0</strong></div>
+                        <div class="live-stat danger"><span>ارسال ناموفق</span><strong id="stFailedUsers">0</strong>
+                        </div>
+                        <div class="live-stat warning"><span>در صف</span><strong id="stPendingUsers">0</strong></div>
+                        <div class="live-stat"><span>درصد پیشرفت</span><strong id="stProgressText">0%</strong></div>
+                        <div class="live-stat"><span>نرخ موفقیت</span><strong id="stSuccessRate">0%</strong></div>
+                    </div>
+
+                    <div class="countdown-card">
+                        <div>
+                            <span class="countdown-label">⏱ زمان باقی‌مانده تا ارسال بعدی</span>
+                            <small id="countdownHint">با تایمر سرور همگام است</small>
+                        </div>
+                        <strong id="liveCountdownTimer">--:--</strong>
+                    </div>
+
+                    <div class="progress-block">
+                        <div class="progress-heading">
+                            <span>پیشرفت کمپین</span>
+                            <strong id="progressPercentLabel">0%</strong>
+                        </div>
+                        <div class="progress-container large">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="progress-meta">
+                            <span><b id="progressSentLabel">0</b> ارسال شده</span>
+                            <span><b id="progressPendingLabel">0</b> باقی‌مانده</span>
+                        </div>
+                    </div>
+
+                    <div class="campaign-daily-stats-card">
+                        <div class="section-title-row compact">
+                            <div>
+                                <div class="section-kicker">DAILY STATISTICS</div>
+                                <h3>آمار روزانه این کمپین</h3>
+                            </div>
+                        </div>
+                        <div class="campaign-daily-stats-table-wrap">
+                            <table class="campaign-daily-stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>تاریخ</th>
+                                        <th>روز</th>
+                                        <th>پیام‌های ارسال‌شده</th>
+                                        <th>خطاها</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="campaignDailyStatsBody">
+                                    <tr>
+                                        <td colspan="4" class="campaign-daily-stats-empty">کمپینی انتخاب نشده است.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card monitoring-side-card">
+                    <div class="section-title-row compact">
+                        <div>
+                            <div class="section-kicker">ACTIVITY</div>
+                            <h3>رویدادهای زنده</h3>
+                        </div>
+                        <button class="clear-log-btn" type="button" onclick="clearLiveLogs()">پاک کردن</button>
+                    </div>
+                    <div id="liveLogsBox" class="live-logs-box">
+                        <div class="log-line"><span>SYS</span> داشبورد مانیتورینگ آماده به کار است.</div>
+                    </div>
+                    <div class="server-status-card">
+                        <span>وضعیت ارتباط با سرور</span>
+                        <strong id="serverConnectionStatus" class="online">● متصل</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        let messagesCache = {};
+
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+
+            const titles = {
+                'tab-upload': 'آپلود فایل مخاطبان',
+                'tab-users': 'مدیریت مخاطبان',
+                'tab-messages': 'ثبت و مدیریت پیام‌ها',
+                'tab-campaign': 'ساخت کمپین جدید',
+                'tab-monitor': 'داشبورد و مانیتورینگ جامع'
+            };
+            document.getElementById('pageTitle').innerText = titles[tabId];
+
+            if (tabId === 'tab-campaign') {
+                loadMetaOptions();
+                attachCampaignFormListeners();
+                updateCampaignSelectionUI();
+            }
+            if (tabId === 'tab-monitor' || tabId === 'tab-users' || tabId === 'tab-messages') {
+                fetchDashboardData();
+            }
+        }
+
+        window.onload = async () => {
+            loadMetaOptions();
+            attachCampaignFormListeners();
+            updateCampaignEstimate();
+            updateCampaignSelectionUI();
+            appendLog('[SYS] ارتباط با پنل برقرار شد.', 'success');
+            startLiveServerLogPolling();
+            await refreshMonitoring(false);
+            if (systemRefreshInterval) clearInterval(systemRefreshInterval);
+            systemRefreshInterval = setInterval(() => fetchSystemStats(), 5000);
+            if (scheduleUiInterval) clearInterval(scheduleUiInterval);
+            scheduleUiInterval = setInterval(updateMonitorScheduleOnly, 1000);
+        };
+
+        async function loadMetaOptions() {
+            try {
+                const subRes = await fetch(`${API_URL}/meta/subjects`);
+                const subData = await subRes.json();
+                const subContainer = document.getElementById('subjectsContainer');
+                subContainer.innerHTML = subData.success && subData.data.length > 0
+                    ? subData.data.map((sub, index) => {
+                        const safe = escapeHtml(sub);
+                        const id = `sub_${index}_${String(sub).replace(/\W+/g, '_')}`;
+                        return `<div class="checkbox-item"><input type="checkbox" name="campSubject" value="${safe}" id="${id}"><label for="${id}">${safe}</label></div>`;
+                    }).join('')
+                    : '<small style="color:var(--danger);">موضوعی یافت نشد.</small>';
+
+                const catRes = await fetch(`${API_URL}/meta/categories`);
+                const catData = await catRes.json();
+                const catContainer = document.getElementById('categoriesContainer');
+                catContainer.innerHTML = catData.success && catData.data.length > 0
+                    ? catData.data.map((cat, index) => {
+                        const safe = escapeHtml(cat);
+                        const id = `cat_${index}_${String(cat).replace(/\W+/g, '_')}`;
+                        return `<div class="checkbox-item"><input type="checkbox" name="campCategory" value="${safe}" id="${id}"><label for="${id}">${safe}</label></div>`;
+                    }).join('')
+                    : '<small style="color:var(--danger);">دسته‌ای یافت نشد.</small>';
+
+                const tagRes = await fetch(`${API_URL}/meta/tags`);
+                const tagData = await tagRes.json();
+                const tagContainer = document.getElementById('tagsContainer');
+                tagContainer.innerHTML = tagData.success && tagData.data.length > 0
+                    ? tagData.data.map((tag, index) => {
+                        const safe = escapeHtml(tag);
+                        const id = `tag_${index}_${String(tag).replace(/\W+/g, '_')}`;
+                        return `<div class="checkbox-item"><input type="checkbox" name="campTag" value="${safe}" id="${id}"><label for="${id}">${safe}</label></div>`;
+                    }).join('')
+                    : '<small style="color:var(--text-muted);">تگی در سرور یافت نشد.</small>';
+
+                attachCampaignFormListeners();
+                updateCampaignSelectionUI();
+                await refreshCampaignStatisticsData();
+            } catch (err) {
+                console.error('خطا در دریافت متادیتا:', err);
+            }
+        }
+
+        async function searchUsers() {
+            const query = document.getElementById('searchInput').value.trim();
+            const tbody = document.getElementById('manageUsersTableBody');
+
+            if (!query) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لطفاً برای جستجوی مخاطب چیزی تایپ کنید...</td></tr>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}`);
+                const json = await res.json();
+
+                if (json.success) {
+                    tbody.innerHTML = '';
+                    if (json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--danger);">مخاطبی یافت نشد.</td></tr>';
+                        return;
+                    }
+                    json.data.forEach(u => {
+                        const tagsStr = u.tags ? u.tags.join(', ') : '';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${u.businessName || 'نامشخص'}</td>
+                                <td>${u.mobile}</td>
+                                <td><span style="background: #eef2ff; color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">${u.category || 'مشتری'}</span></td>
+                                <td>${tagsStr}</td>
+                                <td>${u.isBlocked ? '<span style="color:red; font-weight:bold;">بلاک‌شده</span>' : '<span style="color:green;">عادی</span>'}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="editUser('${u._id}', '${u.businessName || ''}', '${u.mobile}', '${u.category || ''}', '${tagsStr}', '${u.isBlocked}')">ویرایش</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteUser('${u._id}')">حذف</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+
+        async function fetchMessageStats() {
+            const tbody = document.getElementById('messageStatsTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">در حال بارگذاری آمار...</td></tr>';
+
+            try {
+                const res = await fetch(`${API_URL}/messages/stats/by-subject`, { cache: 'no-store' });
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    throw new Error(json.error || 'خطا در دریافت آمار پیام‌ها');
+                }
+
+                const stats = Array.isArray(json.data) ? json.data : [];
+
+                if (!stats.length) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">هنوز پیامی در بانک پیام‌ها ثبت نشده است.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = stats.map(item => {
+                    const subject = escapeHtml(item?._id || 'بدون موضوع');
+                    const count = Number(item?.count || 0);
+                    return `<tr>
+                        <td><strong>${subject}</strong></td>
+                        <td><strong>${toPersianDigits(count)}</strong></td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error('Message Stats Error:', err);
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--danger);">خطا در دریافت آمار پیام‌ها: ${escapeHtml(err.message)}</td></tr>`;
+            }
+        }
+
+        async function searchMessages() {
+            const query = document.getElementById('searchMsgInput').value.trim();
+            const tbody = document.getElementById('manageMessagesTableBody');
+
+            if (!query) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">لطفاً برای جستجوی پیام چیزی تایپ کنید...</td></tr>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/messages/search?q=${encodeURIComponent(query)}`);
+                const json = await res.json();
+
+                if (json.success) {
+                    tbody.innerHTML = '';
+                    messagesCache = {};
+                    if (json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--danger);">پیامی یافت نشد.</td></tr>';
+                        return;
+                    }
+                    json.data.forEach(m => {
+                        messagesCache[m._id] = m;
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${m.subject}</strong></td>
+                                <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.text}">${m.text}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="editMessage('${m._id}')">ویرایش</button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteMessage('${m._id}')">حذف</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function editMessage(id) {
+            const m = messagesCache[id];
+            if (!m) return;
+            document.getElementById('editMsgId').value = m._id;
+            document.getElementById('msgSubject').value = m.subject;
+            document.getElementById('msgText').value = m.text;
+            document.getElementById('msgFormTitle').innerText = '✏️ ویرایش پیام';
+            document.getElementById('saveMsgBtn').innerText = 'ذخیره تغییرات';
+            document.getElementById('cancelMsgEditBtn').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetMessageForm() {
+            document.getElementById('editMsgId').value = '';
+            document.getElementById('msgSubject').value = '';
+            document.getElementById('msgText').value = '';
+            document.getElementById('msgFormTitle').innerText = '✍️ ثبت پیام جدید';
+            document.getElementById('saveMsgBtn').innerText = 'ثبت پیام در دیتابیس';
+            document.getElementById('cancelMsgEditBtn').style.display = 'none';
+        }
+
+        async function uploadMessagesExcel() {
+            const fileInput = document.getElementById('messagesExcelFile');
+            const alertBox = document.getElementById('messagesExcelAlert');
+            if (!fileInput.files.length) {
+                showAlert(alertBox, 'لطفاً فایل اکسل را انتخاب کنید.', false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${API_URL}/messages/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(alertBox, `${data.added} پیام با موفقیت وارد شد.`, true);
+                    fileInput.value = '';
+                    fetchDashboardData();
+                    appendLog(`[Excel] ${data.added} پیام از فایل اکسل وارد شد.`);
+                } else {
+                    showAlert(alertBox, data.error || 'وارد کردن پیام‌ها ناموفق بود.', false);
+                }
+            } catch (err) {
+                showAlert(alertBox, 'خطا در ارتباط با سرور', false);
+            }
+        }
+
+        async function createMessage() {
+            const id = document.getElementById('editMsgId').value;
+            const text = document.getElementById('msgText').value;
+            const subject = document.getElementById('msgSubject').value;
+            const alertBox = document.getElementById('msgAlert');
+
+            if (!text || !subject) {
+                showAlert(alertBox, 'پر کردن تمام فیلدها الزامی است.', false);
+                return;
+            }
+
+            const payload = { text, subject };
+            const url = id ? `${API_URL}/messages/${id}` : `${API_URL}/messages`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(alertBox, id ? 'پیام ویرایش شد.' : 'پیام ثبت شد.', true);
+                    resetMessageForm();
+                    fetchDashboardData();
+                    appendLog(`[Message] پیام با موضوع "${subject}" ثبت/ویرایش شد.`);
+                } else {
+                    showAlert(alertBox, data.error, false);
+                }
+            } catch (err) { showAlert(alertBox, 'خطا در ارتباط با سرور', false); }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('آیا مطمئنید؟')) return;
+            try {
+                const res = await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    searchMessages();
+                    fetchDashboardData();
+                    appendLog(`[Message] یک پیام حذف شد.`);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('editUserId').value;
+            const businessName = document.getElementById('userBusiness').value;
+            const mobile = document.getElementById('userMobile').value;
+            const category = document.getElementById('userCategory').value;
+            const tags = document.getElementById('userTags').value;
+            const isBlocked = document.getElementById('userBlocked').checked;
+            const alertBox = document.getElementById('userFormAlert');
+
+            if (!mobile) {
+                showAlert(alertBox, 'شماره موبایل الزامی است.', false);
+                return;
+            }
+
+            const payload = { businessName, mobile, category, tags, isBlocked };
+            const url = id ? `${API_URL}/users/${id}` : `${API_URL}/users/add`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(alertBox, id ? 'کاربر ویرایش شد.' : 'کاربر اضافه شد.', true);
+                    resetUserForm();
+                    searchUsers();
+                    fetchDashboardData();
+                } else {
+                    showAlert(alertBox, data.error, false);
+                }
+            } catch (err) { showAlert(alertBox, 'خطا در ارتباط با سرور', false); }
+        }
+
+        function editUser(id, biz, mob, cat, tags, blocked) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('userBusiness').value = biz;
+            document.getElementById('userMobile').value = mob;
+            document.getElementById('userCategory').value = cat;
+            document.getElementById('userTags').value = tags;
+            document.getElementById('userBlocked').checked = blocked === 'true';
+            document.getElementById('saveUserBtn').innerText = 'ذخیره تغییرات';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetUserForm() {
+            document.getElementById('editUserId').value = '';
+            document.getElementById('userBusiness').value = '';
+            document.getElementById('userMobile').value = '';
+            document.getElementById('userCategory').value = '';
+            document.getElementById('userTags').value = '';
+            document.getElementById('userBlocked').checked = false;
+            document.getElementById('saveUserBtn').innerText = 'افزودن مخاطب';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('آیا مطمئنید؟')) return;
+            try {
+                const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) { searchUsers(); fetchDashboardData(); }
+            } catch (err) { console.error(err); }
+        }
+
+        async function uploadExcel() {
+            const fileInput = document.getElementById('excelFile');
+            const alertBox = document.getElementById('uploadAlert');
+            if (fileInput.files.length === 0) {
+                showAlert(alertBox, 'لطفاً فایل انتخاب کنید.', false);
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            try {
+                const res = await fetch(`${API_URL}/users/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(alertBox, `آپلود موفق. ${data.added} مخاطب اضافه شد.`, true);
+                    fetchDashboardData();
+                    appendLog(`[Excel] فایل اکسل پردازش شد. ${data.added} کاربر جدید افزوده شد.`);
+                } else { showAlert(alertBox, data.error, false); }
+            } catch (err) { showAlert(alertBox, 'خطا در سرور', false); }
+        }
+
+        // ==============================
+        // مانیتورینگ لحظه‌ای کمپین
+        // ==============================
+        let statusInterval = null;
+        let liveLogsInterval = null;
+        let lastServerLogId = 0;
+        let systemRefreshInterval = null;
+        let countdownTimerInterval = null;
+        let nextRunTimestamp = null;
+        let currentCampaignStatus = 'idle';
+        let currentCampaignSnapshot = null;
+        let lastMonitorSnapshot = null;
+        let scheduleUiInterval = null;
+
+        const DAY_NAMES = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+        const STATUS_TEXT = {
+            idle: 'آماده اجرا',
+            running: 'در حال اجرا',
+            paused: 'متوقف موقت',
+            cancelled: 'لغو شده',
+            completed: 'تکمیل شده'
+        };
+
+        function onCampaignSelected() {
+            const id = document.getElementById('activeCampSelect')?.value;
+            stopCountdown();
+            if (!id) {
+                resetCampaignMonitor();
+                stopLiveStatusPolling();
+                return;
+            }
+            appendLog('[CAMPAIGN] کمپین انتخاب شد.');
+            updateCampaignButtons('idle');
+            fetchCampaignStatus(id, true);
+            startLiveStatusPolling();
+        }
+
+        function startLiveStatusPolling() {
+            if (statusInterval) clearInterval(statusInterval);
+            statusInterval = setInterval(() => fetchCampaignStatus(), 1500);
+        }
+
+        function stopLiveStatusPolling() {
+            if (statusInterval) clearInterval(statusInterval);
+            statusInterval = null;
+        }
+
+        async function startCampaign() {
+            const id = document.getElementById('activeCampSelect').value;
+            if (!id) return alert('ابتدا یک کمپین انتخاب کنید.');
+
+            // قبل از Start/Resume، زمان‌بندی واقعی کمپین از سرور دوباره بررسی می‌شود.
+            // اگر الان خارج از روز/ساعت مجاز باشیم، درخواست Start اصلاً به سرور ارسال نمی‌شود.
+            try {
+                const scheduleRes = await fetch(`${API_URL}/campaigns/${id}/status`, { cache: 'no-store' });
+                const scheduleData = await scheduleRes.json();
+                if (!scheduleRes.ok || !scheduleData.success) {
+                    throw new Error(scheduleData.error || scheduleData.message || 'خطا در بررسی زمان‌بندی کمپین');
+                }
+
+                const schedulePayload = scheduleData.data || scheduleData;
+                const scheduleState = getClientScheduleState(
+                    getMonitorSchedule(schedulePayload),
+                    new Date()
+                );
+
+                renderMonitorSchedule(schedulePayload);
+
+                if (!scheduleState.valid) {
+                    throw new Error('زمان‌بندی کمپین نامعتبر است. لطفاً تنظیمات روز و ساعت را بررسی کنید.');
+                }
+
+                if (!scheduleState.active) {
+                    const nextText = scheduleState.nextStart
+                        ? ` پنجره بعدی: ${formatScheduleDateTime(scheduleState.nextStart)}.`
+                        : '';
+                    throw new Error(`در حال حاضر زمان مجاز شروع این کمپین نیست.${nextText}`);
+                }
+            } catch (scheduleErr) {
+                appendLog(`[SCHEDULE] ${scheduleErr.message}`, 'warn');
+                alert(scheduleErr.message);
+                return;
+            }
+
+            setServerConnection(true);
+            try {
+                const res = await fetch(`${API_URL}/campaigns/${id}/start`, { method: 'POST' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || data.message || 'شروع کمپین ناموفق بود.');
+
+                appendLog('[CAMPAIGN] کمپین شروع شد.', 'success');
+                startLiveStatusPolling();
+                await fetchCampaignStatus(id, true);
+            } catch (err) {
+                appendLog(`[ERROR] ${err.message}`, 'error');
+                setServerConnection(false);
+                alert(err.message || 'خطا در شروع کمپین');
+            }
+        }
+
+        async function stopCampaign(status) {
+            const id = document.getElementById('activeCampSelect').value;
+            if (!id) return alert('ابتدا یک کمپین انتخاب کنید.');
+            if (status === 'cancelled' && !confirm('آیا از لغو این کمپین مطمئن هستید؟')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/campaigns/${id}/stop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || data.message || 'تغییر وضعیت ناموفق بود.');
+
+                stopCountdown();
+                appendLog(status === 'paused' ? '[CAMPAIGN] کمپین موقتاً متوقف شد.' : '[CAMPAIGN] کمپین لغو شد.', status === 'paused' ? 'warn' : 'error');
+                await fetchCampaignStatus(id, true);
+                await refreshCampaignList(false);
+            } catch (err) {
+                appendLog(`[ERROR] ${err.message}`, 'error');
+                alert(err.message || 'خطا در تغییر وضعیت کمپین');
+            }
+        }
+
+        async function resumeCampaign() {
+            const id = document.getElementById('activeCampSelect').value;
+            if (!id) return alert('ابتدا یک کمپین انتخاب کنید.');
+            // Backend فعلی با start کردن دوباره، remainingDelaySeconds را ادامه می‌دهد.
+            await startCampaign();
+        }
+
+        async function togglePauseResume() {
+            if (currentCampaignStatus === 'paused') {
+                await resumeCampaign();
+            } else if (currentCampaignStatus === 'running') {
+                await stopCampaign('paused');
+            }
+        }
+
+        async function deleteCampaign() {
+            const id = document.getElementById('activeCampSelect').value;
+            if (!id) return alert('ابتدا یک کمپین انتخاب کنید.');
+            if (!confirm('این کمپین حذف شود؟')) return;
+
+            try {
+                const res = await fetch(`${API_URL}/campaigns/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'حذف کمپین ناموفق بود.');
+
+                stopCountdown();
+                stopLiveStatusPolling();
+                appendLog('[CAMPAIGN] کمپین حذف شد.', 'error');
+                document.getElementById('activeCampSelect').value = '';
+                resetCampaignMonitor();
+                await refreshMonitoring(true);
+            } catch (err) {
+                appendLog(`[ERROR] ${err.message}`, 'error');
+                alert(err.message || 'خطا در حذف کمپین');
+            }
+        }
+
+        function formatCountdown(totalSeconds) {
+            totalSeconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+            const hours = Math.floor(totalSeconds / 3600);
+            const mins = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
+            if (hours > 0) return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function stopCountdown() {
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+            countdownTimerInterval = null;
+            nextRunTimestamp = null;
+        }
+
+        function syncCountdown(serverSeconds, status) {
+            const el = document.getElementById('liveCountdownTimer');
+            if (!el) return;
+            const seconds = Math.max(0, Math.floor(Number(serverSeconds) || 0));
+
+            if (status !== 'running') {
+                stopCountdown();
+                if (status === 'paused') el.innerText = formatCountdown(seconds);
+                else if (status === 'completed') el.innerText = 'تکمیل شد';
+                else if (status === 'cancelled') el.innerText = 'لغو شد';
+                else el.innerText = '--:--';
+                return;
+            }
+
+            const localRemaining = nextRunTimestamp === null ? null : Math.floor((nextRunTimestamp - Date.now()) / 1000);
+            if (localRemaining === null || Math.abs(localRemaining - seconds) > 2) {
+                nextRunTimestamp = Date.now() + seconds * 1000;
+            }
+
+            if (!countdownTimerInterval) countdownTimerInterval = setInterval(renderCountdown, 250);
+            renderCountdown();
+        }
+
+        function renderCountdown() {
+            const el = document.getElementById('liveCountdownTimer');
+            if (!el || nextRunTimestamp === null) return;
+            const remaining = Math.max(0, Math.floor((nextRunTimestamp - Date.now()) / 1000));
+            el.innerText = remaining > 0 ? formatCountdown(remaining) : 'در حال ارسال...';
+        }
+
+        function statusText(status) {
+            return STATUS_TEXT[status] || status || '-';
+        }
+
+        // ===== تقویم شمسی (جلالی) - فقط رابط کاربری؛ مقدار ذخیره‌شده همچنان ISO میلادی است =====
+        const JALALI_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        const JALALI_WEEKDAYS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+        let activeJalaliPicker = null;
+
+        function div(a, b) { return Math.floor(a / b); }
+        function jalaliToGregorian(jy, jm, jd) {
+            jy = Number(jy); jm = Number(jm); jd = Number(jd);
+            const jYear = jy + 1595;
+            let days = -355668 + 365 * jYear + div(jYear, 33) * 8 + div((jYear % 33) + 3, 4) + jd + (jm < 7 ? (jm - 1) * 31 : (jm - 1) * 30 + 6);
+            let gy = 400 * div(days, 146097); days %= 146097;
+            if (days > 36524) { gy += 100 * div(--days, 36524); days %= 36524; if (days >= 365) days++; }
+            gy += 4 * div(days, 1461); days %= 1461;
+            if (days > 365) { gy += div((days - 1), 365); days = (days - 1) % 365; }
+            const gd = days + 1;
+            const leap = (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0;
+            const monthDays = [0, 31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let gm = 1, rem = gd; while (gm <= 12 && rem > monthDays[gm]) { rem -= monthDays[gm]; gm++; }
+            return [gy, gm, rem];
+        }
+        function gregorianToJalali(gy, gm, gd) {
+            gy = Number(gy) - 1600; gm = Number(gm) - 1; gd = Number(gd) - 1;
+            const leapG = (Number(gy) + 1600) % 4 === 0 && ((Number(gy) + 1600) % 100 !== 0 || (Number(gy) + 1600) % 400 === 0);
+            const gMonthDays = [31, 28 + (leapG ? 1 : 0), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let gDayNo = 365 * gy + div(gy + 3, 4) - div(gy + 99, 100) + div(gy + 399, 400);
+            for (let i = 0; i < gm; i++)gDayNo += gMonthDays[i]; gDayNo += gd;
+            let jDayNo = gDayNo - 79;
+            const jNp = div(jDayNo, 12053); jDayNo %= 12053;
+            let jy = 979 + 33 * jNp + 4 * div(jDayNo, 1461); jDayNo %= 1461;
+            if (jDayNo > 365) { jy += div(jDayNo - 1, 365); jDayNo = (jDayNo - 1) % 365; }
+            const jm = jDayNo < 186 ? 1 + div(jDayNo, 31) : 7 + div(jDayNo - 186, 30);
+            const jd = 1 + (jDayNo < 186 ? jDayNo % 31 : (jDayNo - 186) % 30);
+            return [jy, jm, jd];
+        }
+        function jalaliPad2(value) { return String(value).padStart(2, '0'); }
+        function isoToJalali(iso) {
+            if (!iso) return '';
+            const p = String(iso).split('-').map(Number); if (p.length !== 3 || p.some(n => !Number.isFinite(n))) return '';
+            const j = gregorianToJalali(p[0], p[1], p[2]); return `${toPersianDigits(j[0])}/${toPersianDigits(jalaliPad2(j[1]))}/${toPersianDigits(jalaliPad2(j[2]))}`;
+        }
+        function normalizeDigits(v) { return String(v || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); }
+        function jalaliDisplayToIso(display) {
+            const p = normalizeDigits(display).replace(/[-.]/g, '/').split('/').map(Number); if (p.length !== 3 || p.some(n => !Number.isFinite(n))) return '';
+            const g = jalaliToGregorian(p[0], p[1], p[2]); return `${g[0]}-${jalaliPad2(g[1])}-${jalaliPad2(g[2])}`;
+        }
+        function jalaliMonthLength(y, m) { if (m <= 6) return 31; if (m <= 11) return 30; const a = jalaliToGregorian(y, 1, 1), b = jalaliToGregorian(y + 1, 1, 1); return (Date.UTC(b[0], b[1] - 1, b[2]) - Date.UTC(a[0], a[1] - 1, a[2])) / 86400000 - 336; }
+        function isoToJalaliParts(iso) { if (!iso) return null; const p = iso.split('-').map(Number); if (p.length !== 3) return null; return gregorianToJalali(p[0], p[1], p[2]); }
+        function jalaliToday() { const d = new Date(); return gregorianToJalali(d.getFullYear(), d.getMonth() + 1, d.getDate()); }
+        function jalaliIsValid(y, m, d) { return y >= 1 && m >= 1 && m <= 12 && d >= 1 && d <= jalaliMonthLength(y, m); }
+        function jalaliDayOfWeek(y, m, d) { const g = jalaliToGregorian(y, m, d); return new Date(g[0], g[1] - 1, g[2]).getDay(); }
+        function openJalaliPicker(inputId) {
+            closeJalaliPicker();
+            const input = document.getElementById(inputId); if (!input) return;
+            const current = isoToJalaliParts(input.value) || jalaliToday();
+            const picker = document.createElement('div'); picker.className = 'jalali-picker'; picker.dataset.inputId = inputId;
+            picker.innerHTML = `<div class="jalali-picker-head"><button class="jalali-picker-nav" data-dir="-1">‹</button><div class="jalali-picker-title"></div><button class="jalali-picker-nav" data-dir="1">›</button></div><div class="jalali-picker-week">${JALALI_WEEKDAYS.map(x => `<span>${x}</span>`).join('')}</div><div class="jalali-picker-grid"></div><div class="jalali-picker-footer"><button class="jalali-picker-clear">پاک کردن</button><button class="jalali-picker-today">امروز</button></div>`;
+            document.body.appendChild(picker); activeJalaliPicker = { el: picker, inputId, y: current[0], m: current[1], selected: current };
+            const r = document.getElementById(inputId + 'Display').getBoundingClientRect(); let top = r.bottom + 8, left = r.left; if (left + 330 > innerWidth) left = Math.max(12, innerWidth - 342); if (top + 390 > innerHeight) top = Math.max(12, r.top - 398); picker.style.left = left + 'px'; picker.style.top = top + 'px';
+            renderJalaliPicker();
+        }
+        function renderJalaliPicker() {
+            if (!activeJalaliPicker) return; const { el, y, m, selected } = activeJalaliPicker; el.querySelector('.jalali-picker-title').textContent = `${JALALI_MONTHS[m - 1]} ${toPersianDigits(y)}`;
+            const grid = el.querySelector('.jalali-picker-grid'); const first = jalaliDayOfWeek(y, m, 1); const offset = (first + 6) % 7; let html = '';
+            for (let i = 0; i < offset; i++)html += '<button class="jalali-picker-day muted" disabled></button>';
+            const today = jalaliToday(); const len = jalaliMonthLength(y, m);
+            for (let d = 1; d <= len; d++) { const isSel = selected && selected[0] === y && selected[1] === m && selected[2] === d; const isToday = today[0] === y && today[1] === m && today[2] === d; html += `<button type="button" class="jalali-picker-day${isSel ? ' selected' : ''}${isToday ? ' today' : ''}" data-day="${d}">${toPersianDigits(d)}</button>`; }
+            grid.innerHTML = html;
+            grid.querySelectorAll('[data-day]').forEach(btn => btn.addEventListener('click', () => selectJalaliDate(Number(btn.dataset.day))));
+            el.querySelectorAll('.jalali-picker-nav').forEach(btn => btn.onclick = () => { activeJalaliPicker.m += Number(btn.dataset.dir); if (activeJalaliPicker.m < 1) { activeJalaliPicker.m = 12; activeJalaliPicker.y-- } if (activeJalaliPicker.m > 12) { activeJalaliPicker.m = 1; activeJalaliPicker.y++ } renderJalaliPicker(); });
+            el.querySelector('.jalali-picker-today').onclick = () => { const t = jalaliToday(); activeJalaliPicker.y = t[0]; activeJalaliPicker.m = t[1]; selectJalaliDate(t[2]); };
+            el.querySelector('.jalali-picker-clear').onclick = () => { const id = activeJalaliPicker.inputId; document.getElementById(id).value = ''; document.getElementById(id + 'Display').value = ''; document.getElementById(id).dispatchEvent(new Event('input', { bubbles: true })); closeJalaliPicker(); updateCampaignEstimate(); updateCampaignSelectionUI(); };
+        }
+        function selectJalaliDate(d) { if (!activeJalaliPicker) return; const { y, m, inputId } = activeJalaliPicker; if (!jalaliIsValid(y, m, d)) return; const g = jalaliToGregorian(y, m, d); const iso = `${g[0]}-${jalaliPad2(g[1])}-${jalaliPad2(g[2])}`; document.getElementById(inputId).value = iso; document.getElementById(inputId + 'Display').value = isoToJalali(iso); document.getElementById(inputId).dispatchEvent(new Event('input', { bubbles: true })); closeJalaliPicker(); updateCampaignEstimate(); updateCampaignSelectionUI(); }
+        function closeJalaliPicker() { if (activeJalaliPicker?.el) activeJalaliPicker.el.remove(); activeJalaliPicker = null; }
+        document.addEventListener('click', e => { if (activeJalaliPicker && !activeJalaliPicker.el.contains(e.target) && !e.target.closest('.jalali-calendar-btn') && !e.target.closest('.jalali-date-input')) closeJalaliPicker(); });
+        function syncJalaliDateDisplays() { ['campStartDate', 'campEndDate'].forEach(id => { const h = document.getElementById(id), d = document.getElementById(id + 'Display'); if (h && d) d.value = isoToJalali(h.value); }); }
+
+        function normalizeClientSchedule(schedule) {
+            const source = schedule || {};
+            return {
+                enabled: source.enabled !== false,
+                startDate: source.startDate || '',
+                endDate: source.endDate || '',
+                daysOfWeek: Array.isArray(source.daysOfWeek) ? [...new Set(source.daysOfWeek.map(Number).filter(d => Number.isInteger(d) && d >= 0 && d <= 6))] : [0, 1, 2, 3, 4, 5, 6],
+                startTime: /^\d{2}:\d{2}$/.test(String(source.startTime || '')) ? String(source.startTime) : '10:00',
+                endTime: /^\d{2}:\d{2}$/.test(String(source.endTime || '')) ? String(source.endTime) : '12:00',
+                minDelaySeconds: Number.isFinite(Number(source.minDelaySeconds)) ? Number(source.minDelaySeconds) : 180,
+                maxDelaySeconds: Number.isFinite(Number(source.maxDelaySeconds)) ? Number(source.maxDelaySeconds) : 300
+            };
+        }
+
+        // API جدید تاریخ‌ها و فاصله ارسال را در سطح Campaign برمی‌گرداند،
+        // ولی تنظیمات روز/ساعت داخل schedule هستند. این تابع هر دو ساختار
+        // را برای مانیتورینگ یکپارچه می‌کند تا هیچ فیلدی در UI گم نشود.
+        function getMonitorSchedule(payload) {
+            const p = payload || {};
+            const source = { ...(p.schedule || {}) };
+            if (!source.startDate && p.startDate) source.startDate = p.startDate;
+            if (!source.endDate && p.endDate) source.endDate = p.endDate;
+            if (source.minDelaySeconds == null && p.minDelaySeconds != null) source.minDelaySeconds = p.minDelaySeconds;
+            if (source.maxDelaySeconds == null && p.maxDelaySeconds != null) source.maxDelaySeconds = p.maxDelaySeconds;
+            return normalizeClientSchedule(source);
+        }
+
+        function scheduleTimeToMinutes(value) {
+            const parts = String(value || '').split(':').map(Number);
+            if (parts.length !== 2 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return NaN;
+            if (parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) return NaN;
+            return parts[0] * 60 + parts[1];
+        }
+
+        function parseDateOnly(value) {
+            if (!value) return null;
+            const [y, m, d] = String(value).split('-').map(Number);
+            if (![y, m, d].every(Number.isFinite)) return null;
+            const date = new Date(y, m - 1, d);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function getClientScheduleState(schedule, now = new Date()) {
+            const s = normalizeClientSchedule(schedule);
+            if (!s.enabled) {
+                return { valid: true, active: true, unrestricted: true, nextStart: null, nextEnd: null, schedule: s };
+            }
+
+            const startMinutes = scheduleTimeToMinutes(s.startTime);
+            const endMinutes = scheduleTimeToMinutes(s.endTime);
+            const days = [...new Set(s.daysOfWeek)];
+            const startDate = parseDateOnly(s.startDate);
+            const endDate = parseDateOnly(s.endDate);
+            if (!days.length || !Number.isFinite(startMinutes) || !Number.isFinite(endMinutes) || startMinutes >= endMinutes || !startDate || !endDate || startDate > endDate) {
+                return { valid: false, active: false, nextStart: null, nextEnd: null, schedule: s };
+            }
+
+            const today = new Date(now);
+            today.setHours(0, 0, 0, 0);
+            if (today < startDate || today > endDate) {
+                for (let offset = 0; offset <= 370; offset++) {
+                    const candidate = new Date(today);
+                    candidate.setDate(today.getDate() + offset);
+                    if (candidate < startDate || candidate > endDate || !days.includes(candidate.getDay())) continue;
+                    const candidateStart = new Date(candidate);
+                    candidateStart.setHours(Math.floor(startMinutes / 60), startMinutes % 60, 0, 0);
+                    const candidateEnd = new Date(candidate);
+                    candidateEnd.setHours(Math.floor(endMinutes / 60), endMinutes % 60, 0, 0);
+                    if (candidateStart > now) return { valid: true, active: false, nextStart: candidateStart, nextEnd: candidateEnd, schedule: s };
+                }
+                return { valid: true, active: false, nextStart: null, nextEnd: null, schedule: s };
+            }
+
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentDay = now.getDay();
+            const todayStart = new Date(today);
+            todayStart.setHours(Math.floor(startMinutes / 60), startMinutes % 60, 0, 0);
+            const todayEnd = new Date(today);
+            todayEnd.setHours(Math.floor(endMinutes / 60), endMinutes % 60, 0, 0);
+            const activeToday = days.includes(currentDay) && currentMinutes >= startMinutes && currentMinutes < endMinutes;
+
+            if (activeToday && today >= startDate && today <= endDate) {
+                return { valid: true, active: true, nextStart: todayStart, nextEnd: todayEnd, schedule: s };
+            }
+
+            for (let offset = 0; offset <= 370; offset++) {
+                const candidate = new Date(today);
+                candidate.setDate(today.getDate() + offset);
+                if (candidate < startDate || candidate > endDate || !days.includes(candidate.getDay())) continue;
+                const candidateStart = new Date(candidate);
+                candidateStart.setHours(Math.floor(startMinutes / 60), startMinutes % 60, 0, 0);
+                const candidateEnd = new Date(candidate);
+                candidateEnd.setHours(Math.floor(endMinutes / 60), endMinutes % 60, 0, 0);
+                if (candidateStart > now) return { valid: true, active: false, nextStart: candidateStart, nextEnd: candidateEnd, schedule: s };
+            }
+
+            return { valid: true, active: false, nextStart: null, nextEnd: null, schedule: s };
+        }
+
+        function formatScheduleDateTime(date) {
+            if (!date) return '--';
+            const today = new Date();
+            const sameDay = date.toDateString() === today.toDateString();
+            const time = date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+            return sameDay ? `امروز، ${time}` : `${DAY_NAMES[date.getDay()]} ${date.toLocaleDateString('fa-IR')}، ${time}`;
+        }
+
+        function formatScheduleDays(days, now = new Date()) {
+            const unique = [...new Set((days || []).map(Number))].filter(d => d >= 0 && d <= 6);
+            if (!unique.length) return 'هیچ روزی انتخاب نشده';
+            return unique.sort((a, b) => a - b).map(day => {
+                const todayClass = day === now.getDay() ? ' today' : '';
+                return `<span class="schedule-day-chip${todayClass}">${DAY_NAMES[day]}</span>`;
+            }).join('');
+        }
+
+        function renderMonitorSchedule(payload) {
+            const s = getMonitorSchedule(payload);
+            const state = getClientScheduleState(s, new Date());
+            const stateEl = document.getElementById('monitorScheduleState');
+            const timeEl = document.getElementById('monitorScheduleTime');
+            const dateRangeEl = document.getElementById('monitorScheduleDateRange');
+            const todayEl = document.getElementById('monitorScheduleToday');
+            const nextEl = document.getElementById('monitorNextWindow');
+            const estimateEl = document.getElementById('monitorScheduleEstimate');
+            const activeDaysEl = document.getElementById('monitorScheduleActiveDays');
+            const delayEl = document.getElementById('monitorScheduleDelay');
+            const daysEl = document.getElementById('monitorScheduleDays');
+            const warningEl = document.getElementById('monitorScheduleWarning');
+
+            if (!stateEl || !timeEl) return;
+
+            if (dateRangeEl) {
+                dateRangeEl.innerText = s.startDate && s.endDate
+                    ? `${isoToJalali(s.startDate)} تا ${isoToJalali(s.endDate)}`
+                    : 'تاریخ تعیین نشده';
+            }
+
+            const estimate = payload?.scheduleEstimate;
+
+            timeEl.innerText = state.unrestricted ? 'بدون محدودیت' : `${s.startTime} تا ${s.endTime}`;
+            daysEl.innerHTML = state.unrestricted ? '<span class="schedule-day-chip today">همه روزها</span>' : formatScheduleDays(s.daysOfWeek);
+
+            const minDelay = Number(s.minDelaySeconds);
+            const maxDelay = Number(s.maxDelaySeconds);
+            if (delayEl) {
+                delayEl.innerText = Number.isFinite(minDelay) && Number.isFinite(maxDelay)
+                    ? `${toPersianDigits(minDelay)} تا ${toPersianDigits(maxDelay)} ثانیه`
+                    : '--';
+            }
+            if (activeDaysEl) {
+                const estimateDays = Number(estimate?.activeDays ?? estimate?.selectedDays ?? estimate?.totalActiveDays);
+                activeDaysEl.innerText = Number.isFinite(estimateDays)
+                    ? `${toPersianDigits(estimateDays)} روز`
+                    : (state.unrestricted ? 'همه روزها' : '--');
+            }
+
+            if (state.unrestricted) {
+                estimateEl.innerText = 'بدون محدودیت زمانی';
+            } else if (estimate) {
+                estimateEl.innerText = estimate.totalMinMessages != null ? `${toPersianDigits(estimate.totalMinMessages)} تا ${toPersianDigits(estimate.totalMaxMessages)} پیام در کل بازه` : `${toPersianDigits(estimate.minMessages ?? 0)} تا ${toPersianDigits(estimate.maxMessages ?? 0)} پیام / روز`;
+            } else {
+                const localEstimate = calculateCampaignEstimate(s);
+                estimateEl.innerText = localEstimate ? `${toPersianDigits(localEstimate.minMessages)} تا ${toPersianDigits(localEstimate.maxMessages)} پیام در کل بازه` : '--';
+            }
+
+            if (!state.valid) {
+                stateEl.className = 'schedule-live-state inactive';
+                stateEl.innerText = 'زمان‌بندی نامعتبر';
+                todayEl.innerText = 'تنظیمات نامعتبر';
+                nextEl.innerText = '--';
+                warningEl.className = 'schedule-warning show danger';
+                warningEl.innerText = 'تنظیمات روز/ساعت این کمپین معتبر نیست.';
+                return;
+            }
+
+            if (state.unrestricted) {
+                stateEl.className = 'schedule-live-state active';
+                stateEl.innerText = 'همیشه مجاز';
+                todayEl.innerText = 'مجاز';
+                nextEl.innerText = 'در حال حاضر';
+                warningEl.className = 'schedule-warning show success';
+                warningEl.innerText = 'برای این کمپین محدودیت روز و ساعت فعال نیست.';
+                return;
+            }
+
+            const now = new Date();
+            const todaySelected = s.daysOfWeek.includes(now.getDay());
+            todayEl.innerText = state.active ? `مجاز تا ${s.endTime}` : todaySelected ? `خارج از بازه ${s.startTime} تا ${s.endTime}` : 'امروز انتخاب نشده';
+            nextEl.innerText = state.active ? `تا ${formatScheduleDateTime(state.nextEnd)}` : (state.nextStart ? formatScheduleDateTime(state.nextStart) : '--');
+
+            if (state.active) {
+                stateEl.className = 'schedule-live-state active';
+                stateEl.innerText = 'اکنون فعال';
+                warningEl.className = 'schedule-warning show success';
+                warningEl.innerText = `اکنون داخل پنجره مجاز ارسال هستیم (${s.startTime} تا ${s.endTime}). دکمه شروع فعال است.`;
+            } else {
+                stateEl.className = 'schedule-live-state inactive';
+                stateEl.innerText = 'اکنون غیرفعال';
+                warningEl.className = 'schedule-warning show danger';
+                warningEl.innerText = state.nextStart
+                    ? `در حال حاضر شروع کمپین مجاز نیست. پنجره بعدی: ${formatScheduleDateTime(state.nextStart)}`
+                    : 'در حال حاضر شروع کمپین مجاز نیست.';
+            }
+        }
+
+        function updateMonitorScheduleOnly() {
+            if (currentCampaignSnapshot) renderMonitorSchedule(currentCampaignSnapshot);
+            else {
+                const el = document.getElementById('monitorScheduleState');
+                if (el) { el.className = 'schedule-live-state waiting'; el.innerText = 'کمپین انتخاب نشده'; }
+            }
+            updateCampaignButtons(currentCampaignStatus);
+        }
+
+        function renderCampaignDailyStats(dailyStats) {
+            const tbody = document.getElementById('campaignDailyStatsBody');
+            if (!tbody) return;
+
+            const stats = Array.isArray(dailyStats)
+                ? [...dailyStats].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
+                : [];
+
+            if (!stats.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="campaign-daily-stats-empty">
+                            هنوز برای این کمپین آماری ثبت نشده است.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = stats.map(item => {
+                const date = String(item.date || '');
+                let dayName = '--';
+
+                try {
+                    const parts = date.split('-').map(Number);
+                    if (parts.length === 3 && parts.every(Number.isFinite)) {
+                        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                        dayName = DAY_NAMES[d.getDay()] || '--';
+                    }
+                } catch { }
+
+                const sent = Number(item.sent || 0);
+                const failed = Number(item.failed || 0);
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(isoToJalali(date) || date)}</td>
+                        <td>${escapeHtml(dayName)}</td>
+                        <td class="daily-sent">${sent.toLocaleString('fa-IR')}</td>
+                        <td class="daily-failed">${failed.toLocaleString('fa-IR')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyCampaignStatusToUI(payload) {
+            const status = payload.status || 'idle';
+            const stats = payload.stats || {};
+            const total = Number(stats.totalUsers || 0);
+            const sent = Number(stats.sentUsers || 0);
+            const failed = Number(payload.totalFailed || 0);
+            const pending = Math.max(0, Number(stats.pendingUsers ?? (total - sent)));
+            const progress = Math.max(0, Math.min(100, Number(stats.progressPercent || 0)));
+            const successRate = sent + failed > 0 ? (sent / (sent + failed)) * 100 : 0;
+
+            currentCampaignStatus = status;
+            currentCampaignSnapshot = payload;
+            renderMonitorSchedule(payload);
+            renderCampaignDailyStats(payload.dailyStats);
+
+            document.getElementById('campaignLiveBadge').className = `status-badge ${status}`;
+            document.getElementById('campaignLiveBadge').innerText = statusText(status);
+            document.getElementById('monitorCampaignTitle').innerText = payload.title || '--';
+            document.getElementById('monitorCampaignType').innerText = payload.type === 'festival' ? 'جشنواره' : payload.type === 'normal' ? 'عادی' : '--';
+            document.getElementById('monitorCampaignSubjects').innerText = Array.isArray(payload.subjects) && payload.subjects.length ? payload.subjects.join('، ') : 'همه';
+            document.getElementById('monitorCampaignCategories').innerText = Array.isArray(payload.targetCategories) && payload.targetCategories.length ? payload.targetCategories.join('، ') : 'همه';
+
+            document.getElementById('stTotalUsers').innerText = total.toLocaleString('fa-IR');
+            document.getElementById('stSentUsers').innerText = sent.toLocaleString('fa-IR');
+            document.getElementById('stFailedUsers').innerText = failed.toLocaleString('fa-IR');
+            document.getElementById('stPendingUsers').innerText = pending.toLocaleString('fa-IR');
+            document.getElementById('stProgressText').innerText = `${progress.toFixed(1)}%`;
+            document.getElementById('stSuccessRate').innerText = `${successRate.toFixed(1)}%`;
+            document.getElementById('progressPercentLabel').innerText = `${progress.toFixed(1)}%`;
+            document.getElementById('progressSentLabel').innerText = sent.toLocaleString('fa-IR');
+            document.getElementById('progressPendingLabel').innerText = pending.toLocaleString('fa-IR');
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            const remaining = Number(payload.remainingSeconds || 0);
+            syncCountdown(remaining, status);
+            updateCampaignButtons(status);
+
+            const now = new Date().toLocaleTimeString('fa-IR');
+            document.getElementById('lastSyncTime').innerText = now;
+
+            const snapshot = `${status}|${sent}|${failed}|${pending}`;
+            if (lastMonitorSnapshot && lastMonitorSnapshot !== snapshot) {
+                if (sent > Number(lastMonitorSnapshot.split('|')[1] || 0)) appendLog(`[SEND] یک یا چند پیام با موفقیت ارسال شد. مجموع: ${sent}`, 'success');
+                if (failed > Number(lastMonitorSnapshot.split('|')[2] || 0)) appendLog(`[ERROR] تعداد ارسال ناموفق افزایش یافت. مجموع: ${failed}`, 'error');
+                if (status !== lastMonitorSnapshot.split('|')[0]) appendLog(`[STATUS] وضعیت کمپین: ${statusText(status)}`);
+            }
+            lastMonitorSnapshot = snapshot;
+        }
+
+        function updateCampaignButtons(status) {
+            const start = document.getElementById('startCampaignBtn');
+            const pause = document.getElementById('pauseResumeBtn');
+            const cancel = document.getElementById('cancelCampaignBtn');
+            const del = document.getElementById('deleteCampaignBtn');
+            const hasCampaign = !!document.getElementById('activeCampSelect').value;
+            const scheduleState = currentCampaignSnapshot
+                ? getClientScheduleState(getMonitorSchedule(currentCampaignSnapshot), new Date())
+                : { valid: true, active: false };
+
+            const canStartNow = hasCampaign && scheduleState.valid && scheduleState.active;
+
+            start.disabled = !canStartNow || status === 'running' || status === 'completed' || status === 'cancelled';
+            pause.disabled = !hasCampaign || (status !== 'running' && status !== 'paused');
+            pause.innerText = status === 'paused' ? '▶ ادامه کمپین' : '⏸ توقف موقت';
+            cancel.disabled = !hasCampaign || status === 'completed' || status === 'cancelled' || status === 'idle';
+            del.disabled = !hasCampaign;
+
+            if (!hasCampaign) {
+                start.title = 'ابتدا یک کمپین انتخاب کنید.';
+            } else if (!scheduleState.valid) {
+                start.title = 'زمان‌بندی کمپین نامعتبر است.';
+            } else if (!scheduleState.active && status !== 'running') {
+                start.title = scheduleState.nextStart
+                    ? `شروع فقط از ${formatScheduleDateTime(scheduleState.nextStart)} مجاز است.`
+                    : 'در حال حاضر زمان مجاز شروع نیست.';
+            } else {
+                start.title = 'شروع کمپین';
+            }
+        }
+
+        async function fetchCampaignStatus(idParam, forceLog = false) {
+            const id = idParam || document.getElementById('activeCampSelect')?.value;
+            if (!id) return;
+
+            try {
+                const res = await fetch(`${API_URL}/campaigns/${id}/status`, { cache: 'no-store' });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || data.message || 'خطا در دریافت وضعیت کمپین');
+                const payload = data.data || data;
+                applyCampaignStatusToUI(payload);
+                setServerConnection(true);
+                if (forceLog) appendLog(`[STATUS] وضعیت فعلی: ${statusText(payload.status)}`);
+            } catch (err) {
+                setServerConnection(false);
+                console.error('fetchCampaignStatus:', err);
+            }
+        }
+
+        async function refreshCampaignList(keepSelection = true) {
+            try {
+                const res = await fetch(`${API_URL}/campaigns`, { cache: 'no-store' });
+                const json = await res.json();
+                if (!json.success) throw new Error(json.error || 'خطا در دریافت کمپین‌ها');
+
+                const select = document.getElementById('activeCampSelect');
+                const selected = keepSelection ? select.value : '';
+                select.innerHTML = '<option value="">-- انتخاب کمپین --</option>';
+                json.data.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c._id;
+                    const cs = getMonitorSchedule(c);
+                    const scheduleLabel = cs.enabled ? `${cs.startTime}-${cs.endTime}` : 'بدون محدودیت زمانی';
+                    const dateLabel = cs.startDate && cs.endDate ? `${isoToJalali(cs.startDate)} تا ${isoToJalali(cs.endDate)}` : 'بدون تاریخ';
+                    opt.textContent = `${c.title} — ${c.type === 'normal' ? 'عادی' : 'جشنواره'} — ${dateLabel} — ${scheduleLabel} — ${statusText(c.status)}`;
+                    select.appendChild(opt);
+                });
+                if (selected && json.data.some(c => c._id === selected)) select.value = selected;
+                document.getElementById('sysTotalCampaigns').innerText = json.data.length.toLocaleString('fa-IR');
+                setServerConnection(true);
+                return json.data;
+            } catch (err) {
+                setServerConnection(false);
+                console.error(err);
+                return [];
+            }
+        }
+
+        async function fetchSystemStats() {
+            try {
+                const [usersRes, msgRes, campRes] = await Promise.all([
+                    fetch(`${API_URL}/users`, { cache: 'no-store' }),
+                    fetch(`${API_URL}/messages`, { cache: 'no-store' }),
+                    fetch(`${API_URL}/campaigns`, { cache: 'no-store' })
+                ]);
+                const users = await usersRes.json();
+                const messages = await msgRes.json();
+                const campaigns = await campRes.json();
+
+                if (users.success) {
+                    document.getElementById('sysTotalUsers').innerText = users.data.length.toLocaleString('fa-IR');
+                    document.getElementById('sysActiveUsers').innerText = users.data.filter(u => u.isActive !== false && !u.isBlocked).length.toLocaleString('fa-IR');
+                }
+                if (messages.success) document.getElementById('sysTotalMessages').innerText = Number(messages.count || messages.data?.length || 0).toLocaleString('fa-IR');
+                if (campaigns.success) document.getElementById('sysTotalCampaigns').innerText = campaigns.data.length.toLocaleString('fa-IR');
+                setServerConnection(true);
+            } catch (err) {
+                setServerConnection(false);
+                console.error('fetchSystemStats:', err);
+            }
+        }
+
+        async function refreshMonitoring(manual = false) {
+            await Promise.all([fetchSystemStats(), refreshCampaignList(true)]);
+            const id = document.getElementById('activeCampSelect').value;
+            if (id) {
+                await fetchCampaignStatus(id, manual);
+                startLiveStatusPolling();
+            }
+            if (manual) appendLog('[SYS] داشبورد به‌صورت دستی بروزرسانی شد.');
+        }
+
+        function resetCampaignMonitor() {
+            currentCampaignStatus = 'idle';
+            currentCampaignSnapshot = null;
+            lastMonitorSnapshot = null;
+            stopCountdown();
+            document.getElementById('campaignLiveBadge').className = 'status-badge idle';
+            document.getElementById('campaignLiveBadge').innerText = 'بدون انتخاب';
+            document.getElementById('monitorCampaignTitle').innerText = '--';
+            document.getElementById('monitorCampaignType').innerText = '--';
+            document.getElementById('monitorCampaignSubjects').innerText = '--';
+            document.getElementById('monitorCampaignCategories').innerText = 'همه';
+            ['stTotalUsers', 'stSentUsers', 'stFailedUsers', 'stPendingUsers'].forEach(id => document.getElementById(id).innerText = '0');
+            document.getElementById('stProgressText').innerText = '0%';
+            document.getElementById('stSuccessRate').innerText = '0%';
+            document.getElementById('progressPercentLabel').innerText = '0%';
+            document.getElementById('progressSentLabel').innerText = '0';
+            document.getElementById('progressPendingLabel').innerText = '0';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('liveCountdownTimer').innerText = '--:--';
+            document.getElementById('monitorScheduleTime').innerText = '--';
+            document.getElementById('monitorScheduleToday').innerText = '--';
+            document.getElementById('monitorNextWindow').innerText = '--';
+            document.getElementById('monitorScheduleEstimate').innerText = '--';
+            document.getElementById('monitorScheduleActiveDays').innerText = '--';
+            document.getElementById('monitorScheduleDelay').innerText = '--';
+            document.getElementById('monitorScheduleDays').innerHTML = '--';
+            document.getElementById('monitorScheduleWarning').className = 'schedule-warning';
+            document.getElementById('monitorScheduleWarning').innerText = '';
+            document.getElementById('monitorScheduleState').className = 'schedule-live-state waiting';
+            document.getElementById('monitorScheduleState').innerText = 'کمپین انتخاب نشده';
+            renderCampaignDailyStats([]);
+            updateCampaignButtons('idle');
+        }
+
+        function setServerConnection(isOnline) {
+            const el = document.getElementById('serverConnectionStatus');
+            if (!el) return;
+            el.className = isOnline ? 'online' : 'offline';
+            el.innerText = isOnline ? '● متصل' : '● قطع ارتباط';
+        }
+
+        async function clearLiveLogs() {
+            try {
+                const res = await fetch(`${API_URL}/logs`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || data.message || 'پاک کردن لاگ‌ها ناموفق بود.');
+                }
+
+                lastServerLogId = Number(data.latestId || 0);
+
+                const box = document.getElementById('liveLogsBox');
+                if (box) {
+                    box.innerHTML = '<div class="log-line"><span>SYS</span> لاگ‌ها پاک شدند.</div>';
+                }
+            } catch (err) {
+                appendLog(`[ERROR] پاک کردن لاگ‌ها: ${err.message}`, 'error');
+            }
+        }
+
+        function getServerLogType(level, message) {
+            const text = String(message || '');
+
+            if (level === 'error' || text.includes('❌')) return 'error';
+            if (level === 'warn' || text.includes('⚠️')) return 'warn';
+            if (text.includes('✅') || text.includes('SUCCESS')) return 'success';
+
+            return '';
+        }
+
+        function renderServerLog(log) {
+            const box = document.getElementById('liveLogsBox');
+            if (!box || !log) return;
+
+            const type = getServerLogType(log.level, log.message);
+            const row = document.createElement('div');
+            row.className = `log-line ${type}`;
+
+            const time = new Date(log.timestamp).toLocaleTimeString('fa-IR');
+            const label =
+                type === 'error' ? 'ERR' :
+                    type === 'success' ? 'OK' :
+                        type === 'warn' ? 'WARN' : 'SYS';
+
+            row.innerHTML =
+                `<span>${label}</span> [${time}] ${escapeHtml(log.message)}`;
+
+            box.appendChild(row);
+
+            // تمام لاگ‌هایی که سرور در حافظه نگه می‌دارد در فرانت نیز نگه داشته می‌شوند.
+            // محدودیت ۵۰۰تایی قبلی باعث می‌شد بخشی از تاریخچه حذف شود.
+            while (box.children.length > 5000) {
+                box.removeChild(box.firstChild);
+            }
+
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function fetchLiveServerLogs(initial = false) {
+            try {
+                const after = initial ? 0 : lastServerLogId;
+                const res = await fetch(
+                    `${API_URL}/logs?after=${after}`,
+                    { cache: 'no-store' }
+                );
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'دریافت لاگ‌های سرور ناموفق بود.');
+                }
+
+                if (initial) {
+                    const box = document.getElementById('liveLogsBox');
+                    if (box) box.innerHTML = '';
+
+                    for (const log of (data.logs || [])) {
+                        renderServerLog(log);
+                    }
+                } else {
+                    for (const log of (data.logs || [])) {
+                        renderServerLog(log);
+                    }
+                }
+
+                lastServerLogId = Number(data.latestId || lastServerLogId);
+                setServerConnection(true);
+            } catch (err) {
+                console.error('fetchLiveServerLogs:', err);
+                setServerConnection(false);
+            }
+        }
+
+        function startLiveServerLogPolling() {
+            if (liveLogsInterval) clearInterval(liveLogsInterval);
+
+            fetchLiveServerLogs(true);
+
+            liveLogsInterval = setInterval(() => {
+                fetchLiveServerLogs(false);
+            }, 1000);
+        }
+
+        function appendLog(message, type = '') {
+            const box = document.getElementById('liveLogsBox');
+            if (!box) return;
+            const time = new Date().toLocaleTimeString('fa-IR');
+            const row = document.createElement('div');
+            row.className = `log-line ${type}`;
+            const label = type === 'error' ? 'ERR' : type === 'success' ? 'OK' : type === 'warn' ? 'WARN' : 'SYS';
+            row.innerHTML = `<span>${label}</span> [${time}] ${escapeHtml(message)}`;
+            box.appendChild(row);
+            // لاگ‌های دریافتی از سرور نباید بعد از چند دقیقه از نمایش حذف شوند.
+            while (box.children.length > 5000) box.removeChild(box.firstChild);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+        }
+
+        // این تابع برای سازگاری با سایر بخش‌های پنل نگه داشته شده است.
+        async function fetchDashboardData() {
+            await refreshMonitoring(false);
+            if (typeof fetchMessageStats === 'function') fetchMessageStats();
+        }
+
+        function toPersianDigits(value) {
+            return String(value).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+        }
+
+        function getCampaignScheduleFromForm() {
+            const minDelay = Number(document.getElementById('campMinDelay')?.value);
+            const maxDelay = Number(document.getElementById('campMaxDelay')?.value);
+            return {
+                enabled: document.getElementById('campScheduleEnabled').checked,
+                startDate: document.getElementById('campStartDate').value,
+                endDate: document.getElementById('campEndDate').value,
+                daysOfWeek: Array.from(document.querySelectorAll('input[name="campDay"]:checked')).map(el => Number(el.value)),
+                startTime: document.getElementById('campStartTime').value,
+                endTime: document.getElementById('campEndTime').value,
+                minDelaySeconds: minDelay,
+                maxDelaySeconds: maxDelay
+            };
+        }
+
+        function parseDateOnlyClient(value) {
+            const [y, m, d] = String(value || '').split('-').map(Number);
+            if (![y, m, d].every(Number.isFinite)) return null;
+            const date = new Date(y, m - 1, d);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function countSelectedDaysInRange(startDateValue, endDateValue, daysOfWeek) {
+            const start = parseDateOnlyClient(startDateValue);
+            const end = parseDateOnlyClient(endDateValue);
+            if (!start || !end || start > end) return 0;
+            const days = new Set((daysOfWeek || []).map(Number));
+            let count = 0;
+            for (const cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+                if (days.has(cursor.getDay())) count++;
+            }
+            return count;
+        }
+
+        function calculateCampaignEstimate(schedule) {
+            const startMinutes = scheduleTimeToMinutes(schedule.startTime);
+            const endMinutes = scheduleTimeToMinutes(schedule.endTime);
+            const minDelay = Number(schedule.minDelaySeconds);
+            const maxDelay = Number(schedule.maxDelaySeconds);
+            const averageDelay = (minDelay + maxDelay) / 2;
+            const activeDays = countSelectedDaysInRange(schedule.startDate, schedule.endDate, schedule.daysOfWeek);
+
+            if (!Number.isFinite(startMinutes) || !Number.isFinite(endMinutes) || endMinutes <= startMinutes) return null;
+            if (!Number.isFinite(minDelay) || !Number.isFinite(maxDelay) || minDelay <= 0 || maxDelay < minDelay) return null;
+            if (!activeDays) return null;
+
+            const durationSeconds = (endMinutes - startMinutes) * 60;
+            const dailyMessages = Math.max(1, Math.round(durationSeconds / averageDelay));
+
+            return {
+                durationMinutes: endMinutes - startMinutes,
+                activeDays,
+                dailyMessages,
+                averageMessages: dailyMessages * activeDays
+            };
+        }
+
+        function formatDuration(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            if (hours && mins) return `${toPersianDigits(hours)} ساعت و ${toPersianDigits(mins)} دقیقه`;
+            if (hours) return `${toPersianDigits(hours)} ساعت`;
+            return `${toPersianDigits(mins)} دقیقه`;
+        }
+
+        function updateCampaignEstimate() {
+            const schedule = getCampaignScheduleFromForm();
+            const estimate = calculateCampaignEstimate(schedule);
+            const estimateBox = document.getElementById('campaignEstimate');
+            if (!estimateBox) return;
+
+            const delaySummary = document.getElementById('campaignDelaySummary');
+            if (delaySummary) {
+                delaySummary.innerText = Number.isFinite(schedule.minDelaySeconds) && Number.isFinite(schedule.maxDelaySeconds) && schedule.minDelaySeconds > 0 && schedule.maxDelaySeconds >= schedule.minDelaySeconds
+                    ? `رندوم بین ${toPersianDigits(schedule.minDelaySeconds)} تا ${toPersianDigits(schedule.maxDelaySeconds)} ثانیه`
+                    : 'فاصله ارسال نامعتبر';
+            }
+
+            if (!schedule.daysOfWeek.length || !schedule.startDate || !schedule.endDate) {
+                estimateBox.style.opacity = '0.55';
+                ['estimateDays', 'estimateDaily', 'estimateAvg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = '--';
+                });
+                updateCampaignStatistics();
+                return;
+            }
+
+            if (!estimate) {
+                estimateBox.style.opacity = '0.55';
+                const days = document.getElementById('estimateDays');
+                const daily = document.getElementById('estimateDaily');
+                const avg = document.getElementById('estimateAvg');
+                if (days) days.innerText = 'بازه نامعتبر';
+                if (daily) daily.innerText = '--';
+                if (avg) avg.innerText = '--';
+                updateCampaignStatistics();
+                return;
+            }
+
+            estimateBox.style.opacity = '1';
+            const days = document.getElementById('estimateDays');
+            const daily = document.getElementById('estimateDaily');
+            const avg = document.getElementById('estimateAvg');
+            const users = document.getElementById('estimateUsers');
+            if (days) days.innerText = `${toPersianDigits(estimate.activeDays)} روز`;
+            if (daily) daily.innerText = `${toPersianDigits(estimate.dailyMessages)} پیام`;
+            if (avg) avg.innerText = `${toPersianDigits(estimate.averageMessages)} پیام`;
+            if (users) users.innerText = `${toPersianDigits(calculateSelectedUsers().length)} نفر`;
+
+            updateCampaignStatistics();
+        }
+
+        function getCheckedValues(name) {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+                .map(el => el.value.trim())
+                .filter(Boolean);
+        }
+
+        let campaignUsersCache = [];
+        let campaignMessagesCache = [];
+
+        async function refreshCampaignStatisticsData() {
+            try {
+                const [usersRes, messagesRes] = await Promise.all([
+                    fetch(`${API_URL}/users`, { cache: 'no-store' }),
+                    fetch(`${API_URL}/messages`, { cache: 'no-store' })
+                ]);
+
+                const usersJson = await usersRes.json();
+                const messagesJson = await messagesRes.json();
+
+                campaignUsersCache = usersJson.success && Array.isArray(usersJson.data)
+                    ? usersJson.data
+                    : [];
+
+                campaignMessagesCache = messagesJson.success && Array.isArray(messagesJson.data)
+                    ? messagesJson.data
+                    : [];
+
+                updateCampaignStatistics();
+            } catch (err) {
+                console.error('خطا در دریافت آمار کمپین:', err);
+                campaignUsersCache = [];
+                campaignMessagesCache = [];
+                updateCampaignStatistics();
+            }
+        }
+
+        function calculateSelectedUsers() {
+            const categories = getCheckedValues('campCategory');
+            const tags = getCheckedValues('campTag');
+
+            if (!categories.length) return [];
+
+            return campaignUsersCache.filter(user => {
+                if (user?.isActive === false || user?.isBlocked === true) return false;
+
+                const category = String(user?.category || '').trim();
+                if (!categories.includes(category)) return false;
+
+                if (tags.length) {
+                    const userTags = Array.isArray(user?.tags)
+                        ? user.tags.map(tag => String(tag).trim())
+                        : [];
+                    if (!tags.some(tag => userTags.includes(tag))) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function getSelectedMessagesCount() {
+            const subjects = getCheckedValues('campSubject');
+            if (!subjects.length) return 0;
+
+            return campaignMessagesCache.filter(message =>
+                subjects.includes(String(message?.subject || '').trim())
+            ).length;
+        }
+
+        function updateCampaignStatistics() {
+            const selectedMessages = getSelectedMessagesCount();
+            const selectedUsers = calculateSelectedUsers();
+            const schedule = getCampaignScheduleFromForm();
+            const estimate = calculateCampaignEstimate(schedule);
+            const averageMessages = estimate ? estimate.averageMessages : 0;
+            const rate = selectedMessages > 0 ? (averageMessages / selectedMessages) : 0;
+
+            const messageCountEl = document.getElementById('selectedMessagesCount');
+            const averageEl = document.getElementById('selectedMessagesAverage');
+            const rateEl = document.getElementById('selectedMessagesRate');
+            const usersEl = document.getElementById('selectedUsersCount');
+            const estimateUsersEl = document.getElementById('estimateUsers');
+
+            if (messageCountEl) {
+                messageCountEl.innerText = toPersianDigits(selectedMessages);
+            }
+            if (averageEl) {
+                averageEl.innerText = averageMessages > 0
+                    ? `${toPersianDigits(averageMessages)} پیام`
+                    : '--';
+            }
+            if (rateEl) {
+                rateEl.innerText = selectedMessages > 0
+                    ? toPersianDigits(Number(rate.toFixed(2)))
+                    : '--';
+            }
+            if (usersEl) {
+                usersEl.innerText = toPersianDigits(selectedUsers.length);
+            }
+            if (estimateUsersEl) {
+                estimateUsersEl.innerText = toPersianDigits(selectedUsers.length);
+            }
+        }
+
+        const selectedCampaignImages = new Set();
+
+        function onCampaignContentModeChange() {
+            const mode = document.getElementById('campContentMode')?.value || 'text';
+            const box = document.getElementById('campaignImageLibraryBox');
+            if (box) box.style.display = mode === 'text' ? 'none' : 'block';
+            const subjectLabel = document.querySelector('#subjectsContainer')?.closest('.form-group');
+            const subjectHint = document.getElementById('subjectsValidationHint');
+            if (subjectLabel) subjectLabel.style.opacity = mode === 'image' ? '.55' : '1';
+            if (subjectHint && mode === 'image') subjectHint.style.display = 'none';
+            loadCampaignImageLibrary();
+            updateCampaignSelectionUI();
+        }
+
+        async function loadCampaignImageLibrary() {
+            const gallery = document.getElementById('campaignImageGallery');
+            if (!gallery) return;
+            try {
+                const res = await fetch(`${API_URL}/images`);
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'گالری تصاویر دریافت نشد.');
+                gallery.innerHTML = '';
+                (data.images || []).forEach(img => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:8px;overflow:hidden;';
+                    const checked = selectedCampaignImages.has(img.id) ? 'checked' : '';
+                    card.innerHTML = `<label style="display:block;cursor:pointer;"><img src="${img.url}" alt="تصویر کمپین" style="width:100%;height:105px;object-fit:cover;border-radius:7px;"><div style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;"><input type="checkbox" value="${img.id}" ${checked} class="campaign-image-choice"><span>انتخاب تصویر</span></div></label><button type="button" class="btn btn-secondary" style="width:100%;margin-top:6px;padding:5px;font-size:12px;" data-delete-image="${img.id}">حذف</button>`;
+                    const cb = card.querySelector('.campaign-image-choice');
+                    cb.addEventListener('change', () => {
+                        if (cb.checked) selectedCampaignImages.add(img.id); else selectedCampaignImages.delete(img.id);
+                        updateCampaignImageCount(); updateCampaignSelectionUI();
+                    });
+                    card.querySelector('[data-delete-image]').addEventListener('click', async () => {
+                        if (!confirm('این تصویر از کتابخانه حذف شود؟')) return;
+                        const del = await fetch(`${API_URL}/images/${encodeURIComponent(img.id)}`, { method: 'DELETE' });
+                        const result = await del.json();
+                        if (!del.ok || !result.success) return showAlert(document.getElementById('campAlert'), result.error || 'حذف تصویر انجام نشد.', false);
+                        selectedCampaignImages.delete(img.id); await loadCampaignImageLibrary(); updateCampaignImageCount(); updateCampaignSelectionUI();
+                    });
+                    gallery.appendChild(card);
+                });
+                if (!(data.images || []).length) gallery.innerHTML = '<div style="color:var(--text-muted);">هنوز تصویری بارگذاری نشده است.</div>';
+                updateCampaignImageCount();
+            } catch (error) {
+                gallery.innerHTML = `<div style="color:var(--danger);">${error.message}</div>`;
+            }
+        }
+
+        function updateCampaignImageCount() {
+            const el = document.getElementById('campaignSelectedImagesCount');
+            if (el) el.innerText = toPersianDigits(selectedCampaignImages.size);
+        }
+
+        async function uploadCampaignImages() {
+            const input = document.getElementById('campaignImageUpload');
+            const files = Array.from(input?.files || []);
+            const alertBox = document.getElementById('campAlert');
+            if (!files.length) return showAlert(alertBox, 'ابتدا یک یا چند تصویر انتخاب کنید.', false);
+            try {
+                for (const file of files) {
+                    const form = new FormData(); form.append('image', file);
+                    const res = await fetch(`${API_URL}/images/upload`, { method: 'POST', body: form });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) throw new Error(data.error || `بارگذاری ${file.name} ناموفق بود.`);
+                }
+                input.value = '';
+                showAlert(alertBox, `${toPersianDigits(files.length)} تصویر به کتابخانه اضافه شد.`, true);
+                await loadCampaignImageLibrary();
+            } catch (error) { showAlert(alertBox, error.message || 'بارگذاری تصویر ناموفق بود.', false); }
+        }
+
+        function updateCampaignSelectionUI() {
+            const subjects = getCheckedValues('campSubject');
+            const categories = getCheckedValues('campCategory');
+            const tags = getCheckedValues('campTag');
+
+            const subjectCount = document.getElementById('subjectsSelectionCount');
+            const categoryCount = document.getElementById('categoriesSelectionCount');
+            const tagCount = document.getElementById('tagsSelectionCount');
+            const subjectGroup = document.getElementById('subjectsContainer');
+            const categoryGroup = document.getElementById('categoriesContainer');
+            const subjectHint = document.getElementById('subjectsValidationHint');
+            const categoryHint = document.getElementById('categoriesValidationHint');
+            const createBtn = document.getElementById('createCampaignBtn');
+
+            if (subjectCount) subjectCount.innerText = `${toPersianDigits(subjects.length)} انتخاب`;
+            if (categoryCount) categoryCount.innerText = `${toPersianDigits(categories.length)} انتخاب`;
+            if (tagCount) tagCount.innerText = `${toPersianDigits(tags.length)} انتخاب`;
+
+            const contentMode = document.getElementById('campContentMode')?.value || 'text';
+            const subjectsValid = contentMode === 'image' || subjects.length > 0;
+            const imagesValid = contentMode === 'text' || selectedCampaignImages.size > 0;
+            const categoriesValid = categories.length > 0;
+
+            subjectGroup?.classList.toggle('validation-error', !subjectsValid);
+            subjectGroup?.classList.toggle('validation-ok', subjectsValid);
+            categoryGroup?.classList.toggle('validation-error', !categoriesValid);
+            categoryGroup?.classList.toggle('validation-ok', categoriesValid);
+
+            if (subjectHint) subjectHint.style.display = subjectsValid ? 'none' : 'block';
+            if (categoryHint) categoryHint.style.display = categoriesValid ? 'none' : 'block';
+
+            if (createBtn) {
+                const titleValid = document.getElementById('campTitle')?.value.trim().length > 0;
+                const daysValid = getCampaignScheduleFromForm().daysOfWeek.length > 0;
+                const times = getCampaignScheduleFromForm();
+                const timeValid = !!times.startTime && !!times.endTime && times.startTime < times.endTime;
+                const dateValid = !!times.startDate && !!times.endDate && times.startDate <= times.endDate;
+                const delayValid = Number.isFinite(times.minDelaySeconds) && Number.isFinite(times.maxDelaySeconds) && times.minDelaySeconds > 0 && times.maxDelaySeconds >= times.minDelaySeconds;
+                createBtn.disabled = !(titleValid && subjectsValid && imagesValid && categoriesValid && daysValid && timeValid && dateValid && delayValid);
+            }
+
+            updateCampaignStatistics();
+        }
+
+        function initializeCampaignScheduleDefaults() {
+            const start = document.getElementById('campStartDate');
+            const end = document.getElementById('campEndDate');
+            if (!start || !end) return;
+            const today = new Date();
+            const plus30 = new Date(today);
+            plus30.setDate(today.getDate() + 30);
+            const toInputDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            if (!start.value) start.value = toInputDate(today);
+            if (!end.value) end.value = toInputDate(plus30);
+            syncJalaliDateDisplays();
+        }
+
+        function attachCampaignFormListeners() {
+            const form = document.getElementById('tab-campaign');
+            if (!form || form.dataset.listenersAttached === 'true') return;
+            form.dataset.listenersAttached = 'true';
+
+            form.addEventListener('change', event => {
+                if (event.target.matches('input[name="campSubject"], input[name="campCategory"], input[name="campTag"], input[name="campDay"], #campScheduleEnabled')) {
+                    updateCampaignEstimate();
+                    updateCampaignSelectionUI();
+                }
+            });
+
+            ['campTitle', 'campStartDate', 'campEndDate', 'campStartTime', 'campEndTime', 'campMinDelay', 'campMaxDelay'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', () => {
+                    updateCampaignEstimate();
+                    updateCampaignSelectionUI();
+                });
+            });
+        }
+
+        async function createCampaign() {
+            const title = document.getElementById('campTitle').value.trim();
+            const type = document.getElementById('campType').value;
+            const alertBox = document.getElementById('campAlert');
+            const subjects = getCheckedValues('campSubject');
+            const contentMode = document.getElementById('campContentMode')?.value || 'text';
+            const images = Array.from(selectedCampaignImages);
+            const targetCategories = getCheckedValues('campCategory');
+            const targetTags = getCheckedValues('campTag');
+            const schedule = getCampaignScheduleFromForm();
+
+            // قوانین اجباری ساخت کمپین
+            if (!title) {
+                showAlert(alertBox, 'عنوان کمپین الزامی است.', false);
+                document.getElementById('campTitle')?.focus();
+                return;
+            }
+
+            if (contentMode !== 'image' && !subjects.length) {
+                showAlert(alertBox, 'حداقل یک موضوع پیام را انتخاب کنید.', false);
+                document.getElementById('subjectsContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                updateCampaignSelectionUI();
+                return;
+            }
+
+            if (contentMode !== 'text' && !images.length) {
+                showAlert(alertBox, 'برای حالت تصویری حداقل یک تصویر از کتابخانه انتخاب کنید.', false);
+                document.getElementById('campaignImageLibraryBox')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            if (!targetCategories.length) {
+                showAlert(alertBox, 'حداقل یک مخاطب هدف (دسته‌بندی) را انتخاب کنید.', false);
+                document.getElementById('categoriesContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                updateCampaignSelectionUI();
+                return;
+            }
+
+            if (!schedule.daysOfWeek.length) {
+                showAlert(alertBox, 'حداقل یک روز از هفته را انتخاب کنید.', false);
+                return;
+            }
+
+            if (!schedule.startDate || !schedule.endDate || schedule.startDate > schedule.endDate) {
+                showAlert(alertBox, 'تاریخ پایان باید بعد از یا برابر تاریخ شروع باشد.', false);
+                return;
+            }
+
+            if (!schedule.startTime || !schedule.endTime || schedule.startTime >= schedule.endTime) {
+                showAlert(alertBox, 'ساعت پایان باید بعد از ساعت شروع باشد.', false);
+                return;
+            }
+
+            if (!Number.isFinite(schedule.minDelaySeconds) || !Number.isFinite(schedule.maxDelaySeconds) || schedule.minDelaySeconds <= 0 || schedule.maxDelaySeconds < schedule.minDelaySeconds) {
+                showAlert(alertBox, 'حداقل و حداکثر فاصله ارسال را به‌درستی وارد کنید.', false);
+                return;
+            }
+
+            // تگ اختیاری است؛ در صورت انتخاب، Backend آن را همراه دسته‌بندی اعمال می‌کند.
+            const createBtn = document.getElementById('createCampaignBtn');
+            if (createBtn) createBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/campaigns/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        type,
+                        subjects,
+                        contentMode,
+                        images,
+                        targetCategories,
+                        targetTags,
+                        // server.js جدید تاریخ و فاصله ارسال را در سطح اصلی payload می‌گیرد.
+                        startDate: schedule.startDate,
+                        endDate: schedule.endDate,
+                        minDelaySeconds: schedule.minDelaySeconds,
+                        maxDelaySeconds: schedule.maxDelaySeconds,
+                        schedule: {
+                            enabled: schedule.enabled,
+                            daysOfWeek: schedule.daysOfWeek,
+                            startTime: schedule.startTime,
+                            endTime: schedule.endTime
+                        }
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || data.message || 'ساخت کمپین ناموفق بود.');
+                }
+
+                showAlert(alertBox, 'کمپین با موفقیت ساخته شد.', true);
+                document.getElementById('campTitle').value = '';
+                document.querySelectorAll('#tab-campaign input[name="campSubject"], #tab-campaign input[name="campCategory"], #tab-campaign input[name="campTag"]').forEach(el => { el.checked = false; });
+                selectedCampaignImages.clear();
+                await loadCampaignImageLibrary();
+                updateCampaignSelectionUI();
+                await refreshCampaignStatisticsData();
+                await fetchDashboardData();
+                appendLog(`[Campaign] کمپین جدید با عنوان "${title}" ساخته شد. موضوعات: ${subjects.length}، دسته‌ها: ${targetCategories.join('، ')}${targetTags.length ? `، تگ‌ها: ${targetTags.join('، ')}` : ''}.`, 'success');
+            } catch (err) {
+                showAlert(alertBox, err.message || 'خطا در ارتباط با سرور', false);
+            } finally {
+                updateCampaignSelectionUI();
+            }
+        }
+
+        initializeCampaignScheduleDefaults();
+        loadCampaignImageLibrary();
+        updateCampaignEstimate();
+        updateCampaignSelectionUI();
+
+        function showAlert(element, message, isSuccess) {
+            element.style.display = 'block';
+            element.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'}`;
+            element.innerText = message;
+        }
+    </script>
+</body>
+
+</html>

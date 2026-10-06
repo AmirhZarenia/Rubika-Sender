@@ -1,0 +1,21 @@
+{
+    "name": "rubika-sender",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "dependencies": {
+        "axios": "^1.20.0",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1",
+        "puppeteer": "^25.10.0",
+        "mongoose": "^9.9.5",
+        "multer": "^2.3.0",
+        "node-cron": "^4.6.0",
+        "nodemon": "^3.1.14",
+        "xlsx": "^0.18.5"
+    }
+}
