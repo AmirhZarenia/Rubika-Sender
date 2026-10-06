@@ -4780,9 +4780,9 @@ export const runCampaignWorker = (
 
                 } else {
 
-                    matchQuery.rubikaStatus =
-                        'pending';
-
+                    // وضعیت pending فقط وضعیت کلی روبیکاست و
+                    // نباید مانع انتخاب کاربری شود که در روبیکا ثبت‌نام است.
+                    // سابقه پیام normal معیار جلوگیری از ارسال تکراری است.
                     matchQuery[
                         'rubikaReceivedMessages.messageType'
                     ] = {
