@@ -3475,7 +3475,7 @@
 
                 if (users.success) {
                     document.getElementById('sysTotalUsers').innerText = users.data.length.toLocaleString('fa-IR');
-                    document.getElementById('sysActiveUsers').innerText = users.data.filter(u => u.isActive !== false && !u.isBlocked).length.toLocaleString('fa-IR');
+                    document.getElementById('sysActiveUsers').innerText = users.data.filter(u => u.rubikaStatus !== 'not_registered' && !u.isBlocked).length.toLocaleString('fa-IR');
                 }
                 if (messages.success) document.getElementById('sysTotalMessages').innerText = Number(messages.count || messages.data?.length || 0).toLocaleString('fa-IR');
                 if (campaigns.success) document.getElementById('sysTotalCampaigns').innerText = campaigns.data.length.toLocaleString('fa-IR');
@@ -3828,7 +3828,7 @@
             if (!categories.length) return [];
 
             return campaignUsersCache.filter(user => {
-                if (user?.isActive === false || user?.isBlocked === true) return false;
+                if (user?.rubikaStatus === 'not_registered' || user?.isBlocked === true) return false;
 
                 const category = String(user?.category || '').trim();
                 if (!categories.includes(category)) return false;
