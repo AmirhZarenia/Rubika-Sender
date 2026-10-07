@@ -807,6 +807,8 @@ async function openContacts() {
             `${prefix()} ❌ متن دقیق «مخاطبین» در منوی بازشده پیدا نشد.`
         );
 
+        await refreshRubikaAfterMissingAccount();
+
         throw new Error(
             'CONTACTS_MENU_NOT_FOUND: عنصر دقیق «مخاطبین» پیدا نشد.'
         );
