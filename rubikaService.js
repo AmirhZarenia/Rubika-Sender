@@ -118,7 +118,11 @@ async function launchBrowser() {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled'
+                '--disable-blink-features=AutomationControlled',
+                // جلوگیری از کندشدن تایمرها و رندر صفحه در پس‌زمینه
+                '--disable-background-timer-throttling',
+                '--disable-renderer-backgrounding',
+                '--disable-backgrounding-occluded-windows'
             ]
         };
 
@@ -166,8 +170,87 @@ async function launchBrowser() {
     return page;
 }
 
+async function bringRubikaBrowserWindowToFront() {
+    // فقط پنجره‌ای را فعال می‌کنیم که متعلق به Process همین Puppeteer است؛
+    // بنابراین پنجره‌های بله/واتساپ یا Chromeهای دیگر انتخاب نمی‌شوند.
+    try {
+        const browserProcess = browser?.process?.();
+        const pid = browserProcess?.pid;
+
+        if (process.platform === 'win32' && pid) {
+            const script = String.raw`
+$targetPid = ${Number(pid)}
+$source = @'
+using System;
+using System.Runtime.InteropServices;
+public class RubikaWindowFocus {
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int command);
+    [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+}
+'@
+Add-Type -TypeDefinition $source -ErrorAction Stop
+$script:foundWindow = $false
+$callback = [RubikaWindowFocus+EnumWindowsProc]{
+    param([IntPtr]$hWnd, [IntPtr]$lParam)
+    [uint32]$windowPid = 0
+    [void][RubikaWindowFocus]::GetWindowThreadProcessId($hWnd, [ref]$windowPid)
+    if ($windowPid -eq $targetPid -and [RubikaWindowFocus]::IsWindowVisible($hWnd)) {
+        # SW_RESTORE: اگر پنجره کوچک شده باشد، آن را برمی‌گرداند.
+        [void][RubikaWindowFocus]::ShowWindowAsync($hWnd, 9)
+        [void][RubikaWindowFocus]::BringWindowToTop($hWnd)
+        [void][RubikaWindowFocus]::SetForegroundWindow($hWnd)
+        $script:foundWindow = $true
+        return $false
+    }
+    return $true
+}
+[void][RubikaWindowFocus]::EnumWindows($callback, [IntPtr]::Zero)
+if (-not $script:foundWindow) { exit 2 }
+`;
+            await execFileAsync('powershell.exe', [
+                '-NoProfile',
+                '-NonInteractive',
+                '-ExecutionPolicy', 'Bypass',
+                '-Command', script
+            ], {
+                windowsHide: true,
+                timeout: 7000,
+                maxBuffer: 1024 * 1024
+            });
+            console.log(`${prefix()} 🪟 پنجره مخصوص روبیکا برای اجرای Worker باز/فعال شد.`);
+            return true;
+        }
+
+        // مسیر جایگزین برای سیستم‌عامل‌های غیر ویندوز یا مرورگر بدون process محلی.
+        if (page && !page.isClosed()) {
+            await page.bringToFront();
+            await page.evaluate(() => window.focus()).catch(() => { });
+            return true;
+        }
+    } catch (error) {
+        console.warn(`${prefix()} ⚠️ فعال‌کردن پنجره روبیکا کامل نشد: ${error.message}`);
+        // تلاش جایگزین: حداقل تب روبیکا در همان Browser فعال شود.
+        try {
+            if (page && !page.isClosed()) {
+                await page.bringToFront();
+                await page.evaluate(() => window.focus()).catch(() => { });
+            }
+        } catch { }
+    }
+    return false;
+}
+
 async function openRubikaWeb() {
     const currentPage = await launchBrowser();
+
+    if (currentPage.isClosed()) {
+        throw new Error('RUBIKA_PAGE_CLOSED: صفحه Chrome بسته شده است.');
+    }
 
     const currentUrl = String(currentPage.url() || '');
 
@@ -183,6 +266,18 @@ async function openRubikaWeb() {
 
         await sleep(3000);
     }
+
+    // هر بار که Worker برای ارسال وارد سرویس می‌شود، تب روبیکا را فعال می‌کنیم.
+    // این کار کمک می‌کند صفحه در تب پس‌زمینه رها نشود و رویدادهای UI اجرا شوند.
+    try {
+        await currentPage.bringToFront();
+        await currentPage.evaluate(() => window.focus());
+        console.log(`${prefix()} 🪟 تب مرورگر روبیکا برای اجرای Worker فعال شد.`);
+    } catch (error) {
+        console.warn(`${prefix()} ⚠️ فعال‌کردن تب روبیکا ناموفق بود: ${error.message}`);
+    }
+
+    await bringRubikaBrowserWindowToFront();
 
     return currentPage;
 }
