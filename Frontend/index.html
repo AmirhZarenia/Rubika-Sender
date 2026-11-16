@@ -84,6 +84,31 @@
             color: var(--primary);
         }
 
+        .session-open-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px 14px;
+            border: 0;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #059669, #10b981);
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .session-open-button:hover {
+            opacity: .92;
+            transform: translateY(-1px);
+        }
+
+        .session-open-button:disabled {
+            opacity: .6;
+            cursor: wait;
+            transform: none;
+        }
+
         /* محتوای اصلی */
         main {
             flex: 1;
@@ -1871,6 +1896,10 @@
             <li><button type="button" onclick="switchTab('tab-campaign', this)">🎯 ساخت کمپین</button></li>
             <li><button type="button" onclick="switchTab('tab-monitor', this)">📊 داشبورد و مانیتورینگ</button></li>
         </ul>
+
+        <button type="button" id="openRubikaSessionBtn" class="session-open-button" onclick="openRubikaSession()">
+            لاگین در روبیکا 🔓
+        </button>
     </aside>
 
     <!-- محتوای اصلی صفحات -->
@@ -2408,6 +2437,37 @@
     <script>
         const API_URL = 'http://localhost:3001/api';
         let messagesCache = {};
+
+        async function openRubikaSession() {
+            const button = document.getElementById('openRubikaSessionBtn');
+            if (!button || button.disabled) return;
+
+            const originalText = button.innerText;
+            button.disabled = true;
+            button.innerText = '⏳ در حال باز کردن Chrome...';
+
+            try {
+                const response = await fetch(`${API_URL}/rubika/session/open`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'باز کردن سشن روبیکا ناموفق بود.');
+                }
+
+                appendLog(result.message || 'Chrome روبیکا باز شد.', 'success');
+            } catch (error) {
+                console.error('openRubikaSession:', error);
+                appendLog(`خطا در باز کردن سشن روبیکا: ${error.message}`, 'error');
+                alert(`باز کردن سشن روبیکا ناموفق بود:\n${error.message}`);
+            } finally {
+                button.disabled = false;
+                button.innerText = originalText;
+            }
+        }
 
 
         function switchTab(tabId, btn) {

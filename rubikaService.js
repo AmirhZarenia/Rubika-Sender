@@ -34,6 +34,8 @@ const UI_TIMEOUT = Math.max(
 );
 
 let browser = null;
+let browserProcess = null;
+let browserLaunchPromise = null;
 let page = null;
 let initialized = false;
 
@@ -99,58 +101,171 @@ async function ensureSessionDirectory() {
     });
 }
 
+async function isBrowserProcessAlive(child) {
+    if (!child) return false;
+    return child.exitCode === null && child.signalCode === null;
+}
+
+async function waitForBrowserProcessExit(child, timeout = 6000) {
+    if (!(await isBrowserProcessAlive(child))) return true;
+
+    await Promise.race([
+        new Promise(resolve => child.once('exit', resolve)),
+        sleep(timeout)
+    ]);
+
+    return !(await isBrowserProcessAlive(child));
+}
+
+async function terminateRubikaBrowserProcess(child, reason = 'cleanup') {
+    if (!child?.pid || !(await isBrowserProcessAlive(child))) return;
+
+    const pid = Number(child.pid);
+    console.warn(
+        `${prefix()} ⚠️ بستن اجباری پردازش Chrome روبیکا | PID: ${pid} | علت: ${reason}`
+    );
+
+    try {
+        if (process.platform === 'win32') {
+            await execFileAsync('taskkill.exe', [
+                '/PID', String(pid), '/T', '/F'
+            ], {
+                windowsHide: true,
+                timeout: 10000,
+                maxBuffer: 1024 * 1024
+            });
+        } else {
+            child.kill('SIGTERM');
+        }
+    } catch (error) {
+        // taskkill ممکن است پس از بسته‌شدن هم‌زمان پردازش، کد خروج غیرصفر بدهد.
+        if (await isBrowserProcessAlive(child)) {
+            console.warn(
+                `${prefix()} ⚠️ توقف پردازش Chrome کامل نشد: ${error.message}`
+            );
+        }
+    }
+
+    if (!(await waitForBrowserProcessExit(child, 6000))) {
+        try {
+            child.kill('SIGKILL');
+        } catch { }
+        await waitForBrowserProcessExit(child, 2000);
+    }
+}
+
+async function cleanupTrackedBrowser(reason = 'cleanup') {
+    const currentBrowser = browser;
+    const currentProcess = browserProcess || currentBrowser?.process?.() || null;
+
+    // ابتدا referenceها را جدا می‌کنیم تا درخواست بعدی از نمونه در حال بستن استفاده نکند.
+    browser = null;
+    page = null;
+
+    if (currentBrowser) {
+        try {
+            // با نسخه‌های مختلف Puppeteer سازگار: close را مستقیم اجرا می‌کنیم.
+            await currentBrowser.close();
+        } catch (error) {
+            console.warn(
+                `${prefix()} ⚠️ بستن عادی Chrome روبیکا ناموفق بود: ${error.message}`
+            );
+        }
+    }
+
+    // browser.close ممکن است به دلیل قطع ارتباط CDP، پردازش اصلی را باقی بگذارد.
+    if (currentProcess && !(await waitForBrowserProcessExit(currentProcess, 6000))) {
+        await terminateRubikaBrowserProcess(currentProcess, reason);
+    }
+
+    if (browserProcess === currentProcess) {
+        browserProcess = null;
+    }
+
+    // کمی فرصت می‌دهیم تا ویندوز قفل پروفایل را آزاد کند.
+    await sleep(500);
+}
+
 async function launchBrowser() {
     await ensureSessionDirectory();
 
-    if (browser && !browser.connected) {
-        browser = null;
-        page = null;
-    }
-
-    if (!browser) {
-        const launchOptions = {
-            headless: false,
-            userDataDir: SESSION_DIR,
-            defaultViewport: {
-                width: 1280,
-                height: 800
-            },
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
-                // جلوگیری از کندشدن تایمرها و رندر صفحه در پس‌زمینه
-                '--disable-background-timer-throttling',
-                '--disable-renderer-backgrounding',
-                '--disable-backgrounding-occluded-windows'
-            ]
-        };
-
-        if (CHROME_PATH) {
-            launchOptions.executablePath = CHROME_PATH;
+    if (browser) {
+        try {
+            // به‌جای Browser.isConnected() یک درخواست واقعی CDP می‌زنیم.
+            const pages = await browser.pages();
+            page = pages.find(p => !p.isClosed()) || await browser.newPage();
+            return page;
+        } catch (error) {
+            console.warn(
+                `${prefix()} ⚠️ نمونه قبلی Browser پاسخ نمی‌دهد؛ بازیابی انجام می‌شود: ${error.message}`
+            );
         }
-
-        console.log(
-            `${prefix()} باز کردن Chrome | Session: ${SESSION_DIR}`
-        );
-
-        browser = await puppeteer.launch(launchOptions);
-
-        browser.on('disconnected', () => {
-            console.log(`${prefix()} Chrome بسته شد.`);
-
-            browser = null;
-            page = null;
-        });
     }
 
-    const pages = await browser.pages();
-
-    if (pages.length > 0) {
-        page = pages[0];
-    } else {
-        page = await browser.newPage();
+    // اگر ارتباط Puppeteer قطع شده ولی پردازش Chrome زنده مانده باشد،
+    // قبل از launch جدید فقط همان پردازش متعلق به این سرویس را می‌بندیم.
+    if (browser || browserProcess) {
+        await cleanupTrackedBrowser('بازیابی پس از قطع ارتباط مرورگر');
     }
+
+    // جلوگیری از دو launch هم‌زمان با یک userDataDir.
+    if (!browserLaunchPromise) {
+        browserLaunchPromise = (async () => {
+            const launchOptions = {
+                headless: false,
+                userDataDir: SESSION_DIR,
+                defaultViewport: {
+                    width: 1280,
+                    height: 800
+                },
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-background-timer-throttling',
+                    '--disable-renderer-backgrounding',
+                    '--disable-backgrounding-occluded-windows'
+                ]
+            };
+
+            if (CHROME_PATH) {
+                launchOptions.executablePath = CHROME_PATH;
+            }
+
+            console.log(
+                `${prefix()} باز کردن Chrome | Session: ${SESSION_DIR}`
+            );
+
+            const launchedBrowser = await puppeteer.launch(launchOptions);
+            const launchedProcess = launchedBrowser.process();
+
+            browser = launchedBrowser;
+            browserProcess = launchedProcess;
+
+            launchedBrowser.on('disconnected', () => {
+                console.warn(`${prefix()} ⚠️ ارتباط Puppeteer با Chrome قطع شد.`);
+
+                // فقط reference همان Browser را پاک می‌کنیم؛
+                // Process را نگه می‌داریم تا اگر هنوز زنده بود، قابل پاکسازی باشد.
+                if (browser === launchedBrowser) {
+                    browser = null;
+                    page = null;
+                }
+            });
+
+            return launchedBrowser;
+        })();
+    }
+
+    let launchedBrowser;
+    try {
+        launchedBrowser = await browserLaunchPromise;
+    } finally {
+        browserLaunchPromise = null;
+    }
+
+    const pages = await launchedBrowser.pages();
+    page = pages.find(p => !p.isClosed()) || await launchedBrowser.newPage();
 
     await page.setViewport({
         width: 1280,
@@ -159,7 +274,7 @@ async function launchBrowser() {
 
     try {
         const origin = new URL(RUBIKA_URL).origin;
-        await browser.defaultBrowserContext().overridePermissions(
+        await launchedBrowser.defaultBrowserContext().overridePermissions(
             origin,
             ['clipboard-read', 'clipboard-write']
         );
@@ -2532,46 +2647,53 @@ export async function initRubikaService() {
         return;
     }
 
+    // فقط سرویس را از نظر تنظیمات آماده می‌کنیم.
+    // Chrome باید هنگام ارسال واقعی پیام باز شود، نه هنگام بالا آمدن سرور.
+    await ensureSessionDirectory();
     initialized = true;
 
     console.log(
-        `${prefix()} سرویس شخصی روبیکا در حال راه‌اندازی...`
+        `${prefix()} سرویس روبیکا آماده است؛ Chrome به‌صورت تنبل و فقط هنگام عملیات لازم باز می‌شود.`
     );
-
-    console.log(
-        `${prefix()} Web URL: ${RUBIKA_URL}`
-    );
-
-    console.log(
-        `${prefix()} Session: ${SESSION_DIR}`
-    );
-
-    try {
-        await openRubikaWeb();
-
-        console.log(
-            `${prefix()} ✅ مرورگر Chrome روبیکا باز شد.`
-        );
-
-        console.log(
-            `${prefix()} 🌐 صفحه Web Rubika باز شد.`
-        );
-    } catch (error) {
-        initialized = false;
-
-        console.error(
-            `${prefix()} ❌ خطا در راه‌اندازی Web Rubika:`,
-            error.message
-        );
-
-        throw error;
-    }
+    console.log(`${prefix()} Web URL: ${RUBIKA_URL}`);
+    console.log(`${prefix()} Session: ${SESSION_DIR}`);
 }
 
 function ensureReady() {
     if (!initialized) {
         void initRubikaService();
     }
+}
+
+/**
+ * باز کردن دستی Chrome با همان پروفایل دائمی روبیکا.
+ * این عملیات از صف ارسال عبور می‌کند تا با ارسال کمپین هم‌زمان نشود،
+ * اما برخلاف runRubikaSendTask مرورگر را در پایان نمی‌بندد.
+ */
+export async function openRubikaSessionManually() {
+    if (!initialized) {
+        await initRubikaService();
+    }
+
+    const run = actionQueue.then(async () => {
+        const currentPage = await openRubikaWeb();
+
+        console.log(
+            `${prefix()} 🟢 روبیکا به‌صورت دستی باز شد و تا زمان بسته‌شدن دستی باز می‌ماند.`
+        );
+
+        return {
+            success: true,
+            browserOpen: Boolean(browser),
+            url: currentPage.url(),
+            message: 'Chrome روبیکا باز شد. وارد حساب جدید شو؛ پنجره تا زمان بستن دستی باز می‌ماند.'
+        };
+    });
+
+    // خطای این عملیات نباید صف ارسال‌های بعدی را متوقف کند.
+    actionQueue = run.catch(() => { });
+
+    return run;
 }
 
 export async function getRubikaAuthStatus() {
@@ -2708,16 +2830,7 @@ export async function logoutRubika() {
         initialized = true;
     }
 
-    try {
-        if (browser) {
-            await browser.close();
-        }
-    } catch {
-        // ignore
-    }
-
-    browser = null;
-    page = null;
+    await cleanupTrackedBrowser('خروج دستی از روبیکا');
 
     return {
         success: true,
@@ -4428,6 +4541,24 @@ async function processRubikaActionInternal(
     };
 }
 
+async function closeRubikaBrowserAfterSend() {
+    const hadBrowser = Boolean(browser || browserProcess);
+    await cleanupTrackedBrowser('پایان عملیات ارسال');
+
+    if (hadBrowser) {
+        console.log(`${prefix()} 💤 Chrome روبیکا پس از پایان ارسال بسته و پردازش آن آزاد شد.`);
+    }
+}
+
+async function runRubikaSendTask(task) {
+    try {
+        return await task();
+    } finally {
+        // retryهای همان پیام داخل task تمام می‌شوند؛ سپس مرورگر بسته می‌شود.
+        await closeRubikaBrowserAfterSend();
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | Public Campaign Send
@@ -4450,9 +4581,11 @@ export const processRubikaAction = (
 ) => {
     const run =
         actionQueue.then(() =>
-            processRubikaActionInternal(
-                mobile,
-                text
+            runRubikaSendTask(() =>
+                processRubikaActionInternal(
+                    mobile,
+                    text
+                )
             )
         );
 
@@ -4477,9 +4610,11 @@ export const processRubikaImageAction = (
     imagePath
 ) => {
     const run = actionQueue.then(() =>
-        processRubikaImageActionInternal(
-            mobile,
-            imagePath
+        runRubikaSendTask(() =>
+            processRubikaImageActionInternal(
+                mobile,
+                imagePath
+            )
         )
     );
 
@@ -4494,10 +4629,12 @@ export const processRubikaImageCaptionAction = (
     caption
 ) => {
     const run = actionQueue.then(() =>
-        processRubikaImageCaptionActionInternal(
-            mobile,
-            imagePath,
-            caption
+        runRubikaSendTask(() =>
+            processRubikaImageCaptionActionInternal(
+                mobile,
+                imagePath,
+                caption
+            )
         )
     );
 

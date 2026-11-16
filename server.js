@@ -15,6 +15,7 @@ import RubikaCampaign from './models/RubikaCampaign.js';
 
 import {
     initRubikaService,
+    openRubikaSessionManually,
     getRubikaAuthStatus,
     sendCode,
     verifyCode,
@@ -4050,6 +4051,31 @@ app.put(
 
         }
 
+    }
+);
+
+
+// ==========================================
+// باز کردن دستی سشن Chrome روبیکا
+// ==========================================
+
+app.post(
+    '/api/rubika/session/open',
+    async (_req, res) => {
+        try {
+            const result = await openRubikaSessionManually();
+            return res.json(result);
+        } catch (error) {
+            console.error(
+                '[RubikaServer] خطا در باز کردن دستی روبیکا:',
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: error.message || 'باز کردن Chrome روبیکا ناموفق بود.'
+            });
+        }
     }
 );
 
